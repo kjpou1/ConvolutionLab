@@ -1,0 +1,20 @@
+pandas
+numpy>=1.26.4
+seaborn
+matplotlib
+python-dotenv
+ipykernel
+scikit-learn==1.5.2
+catboost
+xgboost
+dill
+pytest
+flask
+pydantic
+fastapi
+uvicorn
+httpx
+jinja2
+python-multipart
+pyyaml
+-e .

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastHTML Prediction Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+        header {
+            background-color: #007bff;
+            padding: 15px;
+            color: white;
+            font-size: 1.5em;
+        }
+        main {
+            margin: 20px auto;
+            max-width: 600px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: #007bff;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #555;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        FastHTML Prediction Interface
+    </header>
+    <main>
+        <h1>Predict Student Exam Performance</h1>
+        <p>Enter the details below to predict a student's math score.</p>
+        <form action="/submit" method="post">
+            <!-- Gender -->
+            <div class="form-group">
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender" required>
+                    <option selected disabled value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+
+            <!-- Race/Ethnicity -->
+            <div class="form-group">
+                <label for="ethnicity">Race/Ethnicity:</label>
+                <select id="ethnicity" name="ethnicity" required>
+                    <option selected disabled value="">Select Ethnicity</option>
+                    <option value="group A">Group A</option>
+                    <option value="group B">Group B</option>
+                    <option value="group C">Group C</option>
+                    <option value="group D">Group D</option>
+                    <option value="group E">Group E</option>
+                </select>
+            </div>
+
+            <!-- Parental Education -->
+            <div class="form-group">
+                <label for="parental_level_of_education">Parental Education:</label>
+                <select id="parental_level_of_education" name="parental_level_of_education" required>
+                    <option selected disabled value="">Select Education</option>
+                    <option value="high school">High School</option>
+                    <option value="associate's degree">Associate's Degree</option>
+                    <option value="bachelor's degree">Bachelor's Degree</option>
+                    <option value="master's degree">Master's Degree</option>
+                    <option value="some college">Some College</option>
+                    <option value="some high school">Some High School</option>
+                </select>
+            </div>
+
+            <!-- Lunch -->
+            <div class="form-group">
+                <label for="lunch">Lunch:</label>
+                <select id="lunch" name="lunch" required>
+                    <option selected disabled value="">Select Lunch Type</option>
+                    <option value="standard">Standard</option>
+                    <option value="free/reduced">Free/Reduced</option>
+                </select>
+            </div>
+
+            <!-- Test Preparation -->
+            <div class="form-group">
+                <label for="test_preparation_course">Test Prep:</label>
+                <select id="test_preparation_course" name="test_preparation_course" required>
+                    <option selected disabled value="">Select Test Prep</option>
+                    <option value="none">None</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+
+            <!-- Reading and Writing Scores -->
+            <div class="form-group">
+                <label for="reading_score">Reading Score:</label>
+                <input type="number" id="reading_score" name="reading_score" min="0" max="100" placeholder="Enter Reading Score" required >
+            </div>
+            <div class="form-group">
+                <label for="writing_score">Writing Score:</label>
+                <input type="number" id="writing_score" name="writing_score" min="0" max="100" placeholder="Enter Writing Score" required>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-group">
+                <button type="submit">Predict Math Score</button>
+            </div>
+        </form>
+    </main>
+    <footer>
+        &copy; 2025 FastHTML Prediction Interface | All rights reserved.
+    </footer>
+</body>
+</html>
