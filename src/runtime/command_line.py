@@ -110,7 +110,7 @@ class CommandLine:
             command=args.command,
             config=args.config,
             debug=args.debug,
-            model_type=args.model_type,
-            best_of_all=args.best_of_all,
-            save_best=args.save_best,
+            model_type=args.model_type if hasattr(args, "model_type") else None,
+            best_of_all=args.best_of_all if hasattr(args, "best_of_all") else False,
+            save_best=args.save_best if hasattr(args, "save_best") else False,
         )

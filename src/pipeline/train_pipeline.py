@@ -7,7 +7,8 @@ from src.exception import CustomException
 from src.logger_manager import LoggerManager
 from src.services.data_ingestion_service import DataIngestionService
 from src.services.data_transformation_service import DataTransformationService
-from src.services.model_selection_service import ModelSelectionService
+
+# from src.services.model_selection_service import ModelSelectionService
 from src.services.model_training_service import ModelTrainingService
 from src.utils.file_utils import save_json, save_object
 from src.utils.history_utils import append_training_history, update_training_history
@@ -20,7 +21,6 @@ class TrainPipeline:
     def __init__(self):
         self.data_ingestion_service = DataIngestionService()
         self.data_transformation_service = DataTransformationService()
-        self.model_selection_service = ModelSelectionService()
         self.model_training_service = ModelTrainingService()
         self.config = Config()
 
