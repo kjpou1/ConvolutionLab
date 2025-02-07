@@ -1,10 +1,11 @@
-# ml_project_template  
-A scalable and modular template for machine learning projects, featuring CI/CD integration, configuration management, robust testing, Dockerization, and comprehensive documentation. Ideal for production-ready ML workflows.
+# ConvolutionLab  
+**ConvolutionLab** is a research-driven project that leverages machine learning to develop and test predictive models for financial trading. At its core, the project focuses on **Leavitt Convolution**, a linear regression-based smoothing technique, to forecast market trends and improve trading decisions.
+
 
 ---
 
 ## Table of Contents  
-- [ml\_project\_template](#ml_project_template)
+- [ConvolutionLab](#convolutionlab)
   - [Table of Contents](#table-of-contents)
   - [Description](#description)
   - [Features](#features)
@@ -31,7 +32,8 @@ A scalable and modular template for machine learning projects, featuring CI/CD i
 ---
 
 ## Description  
-This project provides a reusable template to kickstart machine learning workflows. Designed for scalability, modularity, and production readiness, it features:  
+The project integrates residual error correction models to enhance the accuracy of Leavitt-based projections, providing robust tools for price forecasting and trend-following strategies. By combining these techniques with state-of-the-art machine learning methods, ConvolutionLab aims to deliver actionable insights for traders and quantitative researchers.
+
 - Clear pipeline-based architecture for training and prediction.  
 - REST API and web applications for serving predictions.  
 - Robust testing for ensuring reliability.  
@@ -43,6 +45,10 @@ This project provides a reusable template to kickstart machine learning workflow
 - REST API and Flask-based web UI for prediction services.  
 - Logging and error handling with customizable configurations.  
 - Comprehensive test suite with coverage reports.  
+- **Leavitt Convolution Integration**: Implements advanced smoothing and projection techniques for 1-bar ahead forecasting.
+- **Residual Error Correction**: Enhances the accuracy of projections through machine learning-based adjustments.
+- **Trend Analysis**: Identifies turning points and market direction using convolution probability functions.
+- **Backtesting and Evaluation**: Tests the performance of predictive models on historical data to validate trading strategies.
 
 ---
 
