@@ -17,4 +17,6 @@ httpx
 jinja2
 python-multipart
 pyyaml
+pandas_ta
+nbformat
 -e .
