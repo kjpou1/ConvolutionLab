@@ -81,7 +81,9 @@ class Host:
         Execute the data ingestion workflow.
         """
         data_ingestion_service = DataIngestionService()
-        data_ingestion_service.initiate_data_ingestion()
+        data_ingestion_service.initiate_data_ingestion(
+            target_column="Projected_Direction"
+        )
 
     async def run_training(self):
         """

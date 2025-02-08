@@ -121,7 +121,7 @@ def linreg_features(price_series, length, tgt_bar=0):
         intercepts[i] = intercept
 
     return (
-        pd.Series(linreg_values, index=price_series.index).fillna(method="bfill"),
+        pd.Series(linreg_values, index=price_series.index).bfill(),
         pd.Series(slopes, index=price_series.index),
         pd.Series(intercepts, index=price_series.index),
     )

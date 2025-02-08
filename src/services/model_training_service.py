@@ -3,7 +3,10 @@ import os
 import uuid
 from datetime import datetime
 
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import shap
 from catboost import CatBoostRegressor
 from sklearn.ensemble import (
     AdaBoostRegressor,
@@ -13,7 +16,7 @@ from sklearn.ensemble import (
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import GridSearchCV
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBRegressor
 
 from src.config.config import Config

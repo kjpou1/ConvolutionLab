@@ -28,8 +28,10 @@ class TrainPipeline:
         try:
             # Step 1: Data Ingestion
             logging.info("Starting data ingestion.")
-            train_path, test_path = (
-                self.data_ingestion_service.initiate_data_ingestion()
+            train_path, test_path, _ = (
+                self.data_ingestion_service.initiate_data_ingestion(
+                    "Projected_Direction"
+                )
             )
             logging.info(f"Data ingested. Train: {train_path}, Test: {test_path}")
 
@@ -37,9 +39,10 @@ class TrainPipeline:
             logging.info("Starting data transformation.")
             train_arr, test_arr, preprocessor_path = (
                 self.data_transformation_service.initiate_data_transformation(
-                    train_path, test_path
+                    train_path, test_path, target_column="Projected_Direction"
                 )
             )
+
             logging.info(
                 f"Data transformed and preprocessor saved at: {preprocessor_path}"
             )
