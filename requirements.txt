@@ -19,4 +19,5 @@ python-multipart
 pyyaml
 pandas_ta
 nbformat
+shap
 -e .
