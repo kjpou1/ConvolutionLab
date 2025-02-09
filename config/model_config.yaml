@@ -1,45 +1,56 @@
 models:
+  CatBoosting Regressor:
+    type: CatBoostRegressor
+    params:
+      depth: [4, 5]  
+      learning_rate: [0.034]  # Small boost to refine learning  
+      iterations: [2500, 2700]  
+      l2_leaf_reg: [150, 190, 230]  
+      bagging_temperature: [4.8, 5.3]  
+    verbose: False
+    train_dir: artifacts/catboost_training
+
+  XGBRegressor:
+    type: XGBRegressor
+    params:
+      learning_rate: [0.065]  
+      n_estimators: [2500, 2700]  
+      max_depth: [5, 6]  
+      subsample: [0.78, 0.82]  
+      colsample_bytree: [0.72, 0.78]  # Increasing feature selection diversity  
+      reg_alpha: [28, 30]  
+      reg_lambda: [30, 38]  
+      min_child_weight: [4, 6]  # More flexible splits for recall improvement  
+
   Random Forest:
     type: RandomForestRegressor
     params:
-      n_estimators: [8, 16, 32, 64, 128, 256]
+      max_depth: [3, 5, 10]  # Reduce depth to prevent overfitting
+      min_samples_split: [5, 10]  # Prevent small splits
+      min_samples_leaf: [2, 5, 10]  # Avoid tiny leaf nodes
 
-  Decision Tree:
-    type: DecisionTreeRegressor
-    params:
-      criterion: ["squared_error", "friedman_mse", "absolute_error", "poisson"]
+  # Not suitable because of negative numbers
+  # Decision Tree:
+  #   type: DecisionTreeRegressor
+  #   params:
+  #     criterion: ["squared_error", "friedman_mse", "absolute_error", "poisson"]
+
+  # Not suitable
+  # Linear Regression:
+  #   type: LinearRegression
+  #   params: {}
 
   Gradient Boosting:
     type: GradientBoostingRegressor
     params:
       learning_rate: [0.1, 0.01, 0.05, 0.001]
-      subsample: [0.6, 0.7, 0.75, 0.8, 0.85, 0.9]
-      n_estimators: [8, 16, 32, 64, 128, 256]
-
-  Linear Regression:
-    type: LinearRegression
-    params: {}
-
-  XGBRegressor:
-    type: XGBRegressor
-    params:
-      learning_rate: [0.1, 0.01, 0.05, 0.001]
-      n_estimators: [8, 16, 32, 64, 128, 256]
-      max_depth: [3, 5, 7]
-      subsample: [0.8, 1.0]
-      colsample_bytree: [0.8, 1.0]
-
-  CatBoosting Regressor:
-    type: CatBoostRegressor
-    params:
-      depth: [6, 8, 10]
-      learning_rate: [0.01, 0.05, 0.1]
-      iterations: [30, 50, 100]
-    verbose: False
-    train_dir: artifacts/catboost_training
+      subsample: [0.8, 0.85, 0.9]  # Increasing randomness to reduce overfitting
+      n_estimators: [64, 128, 256]  # Keeping stable
+      max_depth: [3, 4]  # Limiting tree growth to prevent overfitting
+      min_samples_split: [10, 15]  # Forcing larger splits
 
   AdaBoost Regressor:
     type: AdaBoostRegressor
     params:
-      learning_rate: [0.1, 0.01, 0.5, 0.001]
-      n_estimators: [8, 16, 32, 64, 128, 256]
+      learning_rate: [0.05, 0.1, 0.2]  
+      n_estimators: [256, 512, 1024]  

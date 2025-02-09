@@ -16,7 +16,7 @@ from sklearn.ensemble import (
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import GridSearchCV
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeRegressor
 from xgboost import XGBRegressor
 
 from src.config.config import Config
@@ -35,7 +35,7 @@ class ModelTrainingService:
         os.makedirs(self.model_trainer_config.catboost_training_dir, exist_ok=True)
 
     def train_and_validate(
-        self, model_name, train_array: np.ndarray, test_array: np.ndarray
+        self, model_name, train_array: np.ndarray, validation_array: np.ndarray
     ):
         try:
             # Train the model
@@ -44,8 +44,8 @@ class ModelTrainingService:
             X_train, y_train, X_test, y_test = (
                 train_array[:, :-1],  # Features for training
                 train_array[:, -1],  # Target for training
-                test_array[:, :-1],  # Features for testing
-                test_array[:, -1],  # Target for testing
+                validation_array[:, :-1],  # Features for testing
+                validation_array[:, -1],  # Target for testing
             )
 
             model_configs = load_model_config()
@@ -73,7 +73,7 @@ class ModelTrainingService:
 
             # Evaluate all models
             logging.info(
-                "Evaluating models with the provided training and testing data."
+                "Evaluating models with the provided training and validation data."
             )
             # Log the start of evaluation for the current model
             logging.info(f"Evaluating model: {model_name}")
@@ -107,14 +107,14 @@ class ModelTrainingService:
 
             # Log scores for the model
             logging.info(
-                f"Model: {model_name} | Train R2: {train_model_score:.4f} | Test R2: {test_model_score:.4f}"
+                f"Model: {model_name} | Train R2: {train_model_score:.4f} | Validation R2: {test_model_score:.4f}"
             )
 
             train_results = {
                 "model": model,
                 "model_name": model_name,
                 "train_r2": train_model_score,
-                "test_r2": test_model_score,
+                "validation_r2": test_model_score,
             }
 
             self.logger.info("Model training completed successfully.")

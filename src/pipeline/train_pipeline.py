@@ -7,8 +7,6 @@ from src.exception import CustomException
 from src.logger_manager import LoggerManager
 from src.services.data_ingestion_service import DataIngestionService
 from src.services.data_transformation_service import DataTransformationService
-
-# from src.services.model_selection_service import ModelSelectionService
 from src.services.model_training_service import ModelTrainingService
 from src.utils.file_utils import save_json, save_object
 from src.utils.history_utils import append_training_history, update_training_history
@@ -28,18 +26,20 @@ class TrainPipeline:
         try:
             # Step 1: Data Ingestion
             logging.info("Starting data ingestion.")
-            train_path, test_path, _ = (
+            train_path, validation_path, _, _ = (
                 self.data_ingestion_service.initiate_data_ingestion(
                     "Projected_Direction"
                 )
             )
-            logging.info(f"Data ingested. Train: {train_path}, Test: {test_path}")
+            logging.info(
+                f"Data ingested. Train: {train_path}, Validatoin: {validation_path}"
+            )
 
             # Step 2: Data Transformation
             logging.info("Starting data transformation.")
-            train_arr, test_arr, preprocessor_path = (
+            train_arr, validation_arr, preprocessor_path = (
                 self.data_transformation_service.initiate_data_transformation(
-                    train_path, test_path, target_column="Projected_Direction"
+                    train_path, validation_path, target_column="Projected_Direction"
                 )
             )
 
@@ -84,11 +84,11 @@ class TrainPipeline:
             # for model_type, model_info in model_configs["models"].items():
             for model_type in models_to_train:
                 train_results = self.model_training_service.train_and_validate(
-                    model_type, train_arr, test_arr
+                    model_type, train_arr, validation_arr
                 )
                 model_report[model_type] = {
                     "train_r2": train_results["train_r2"],
-                    "test_r2": train_results["test_r2"],
+                    "validation_r2": train_results["validation_r2"],
                 }
                 model_instances[model_type] = {
                     "model": train_results["model"],
@@ -97,7 +97,7 @@ class TrainPipeline:
 
             # Once all models are trained, select the best one based on test_r2
             best_model_name = max(
-                model_report, key=lambda m: model_report[m]["test_r2"]
+                model_report, key=lambda m: model_report[m]["validation_r2"]
             )
             best_model_results = model_report[best_model_name]
             best_model = model_instances[best_model_name]["model"]
@@ -107,7 +107,7 @@ class TrainPipeline:
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "model": best_model_name,
                 "train_r2": best_model_results["train_r2"],
-                "test_r2": best_model_results["test_r2"],
+                "validation_r2": best_model_results["validation_r2"],
                 "model_report": model_report,
             }
 

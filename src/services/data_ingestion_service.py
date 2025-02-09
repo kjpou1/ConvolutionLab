@@ -43,12 +43,16 @@ class DataIngestionService:
 
         # Momentum factors
         for lag in lag_periods:
-            df[f"Momentum_T-{lag}"] = df["Returns"].sub(df[f"Returns_T-{lag}"])
+            df[f"Momentum_T-{lag}"] = df["Returns"].sub(df["Returns"].shift(lag))
 
         # Time-based features
+        # Feature Importance
         df["Hour"] = pd.to_datetime(df.index).hour
+        # Feature Importance
         df["Day_Of_Week"] = pd.to_datetime(df.index).dayofweek
+        # Feature Importance
         df["Month"] = pd.to_datetime(df.index).month
+        # Feture Importance
         df["Year"] = pd.to_datetime(df.index).year
 
         return df
@@ -196,11 +200,11 @@ class DataIngestionService:
                 "Momentum_T-5",
                 "Momentum_T-10",
                 "Momentum_T-21",
-                "Returns_T-1",
-                "Returns_T-2",
-                "Returns_T-5",
-                "Returns_T-10",
-                "Returns_T-21",
+                # "Returns_T-1",
+                # "Returns_T-2",
+                # "Returns_T-5",
+                # "Returns_T-10",
+                # "Returns_T-21",
                 "Hour",
                 "Day_Of_Week",
                 "Month",
@@ -266,32 +270,23 @@ class DataIngestionService:
             )
 
             df_cleaned.to_csv(
-                self.ingestion_config.raw_data_path, index=True, header=True
+                self.ingestion_config.raw_data_path, index=False, header=True
             )
             logging.info("Raw dataset saved successfully.")
 
             train_set, val_set, test_set = self.data_split_service.sequential_split(
                 df_cleaned, test_size=test_size, val_size=val_size
             )
-            # # Split into train and test sets
-            # train_set, test_set = train_test_split(
-            #     df_cleaned, test_size=test_size, random_state=42
-            # )
-
-            # # Split train set further into train and validation sets
-            # train_set, val_set = train_test_split(
-            #     train_set, test_size=val_size, random_state=42
-            # )
 
             # Save the datasets
             train_set.to_csv(
-                self.ingestion_config.train_data_path, index=True, header=True
+                self.ingestion_config.train_data_path, index=False, header=True
             )
             val_set.to_csv(
-                self.ingestion_config.validation_data_path, index=True, header=True
+                self.ingestion_config.validation_data_path, index=False, header=True
             )
             test_set.to_csv(
-                self.ingestion_config.test_data_path, index=True, header=True
+                self.ingestion_config.test_data_path, index=False, header=True
             )
             logging.info("Train, validation, and test datasets saved successfully.")
 

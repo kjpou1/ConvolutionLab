@@ -61,7 +61,9 @@ class DataTransformationService:
                 "Returns_T-21",
             ]
 
+            # Feature Importance
             categorical_columns = ["Day_Of_Week", "Month", "Year"]
+            # categorical_columns = ["Year"]
 
             # **🔹 Handle Hour Column Differently Based on Encoding Choice**
             if use_cyclical_encoding:
