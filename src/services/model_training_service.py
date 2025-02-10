@@ -1,29 +1,24 @@
 import logging
 import os
-import uuid
-from datetime import datetime
 
-import matplotlib.pyplot as plt
+import joblib
 import numpy as np
-import pandas as pd
-import shap
-from catboost import CatBoostRegressor
+from catboost import CatBoostClassifier
+from lightgbm import LGBMClassifier
 from sklearn.ensemble import (
-    AdaBoostRegressor,
-    GradientBoostingRegressor,
-    RandomForestRegressor,
+    AdaBoostClassifier,
+    GradientBoostingClassifier,
+    RandomForestClassifier,
 )
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import GridSearchCV
-from sklearn.tree import DecisionTreeRegressor
-from xgboost import XGBRegressor
+from sklearn.tree import DecisionTreeClassifier
+from xgboost import XGBClassifier
 
 from src.config.config import Config
 from src.exception import CustomException
 from src.models.model_trainer_config import ModelTrainerConfig
-from src.utils.file_utils import save_training_artifacts
-from src.utils.ml_utils import evaluate_models
 from src.utils.yaml_loader import load_model_config
 
 
@@ -41,44 +36,41 @@ class ModelTrainingService:
             # Train the model
             self.logger.info("Starting model training.")
 
-            X_train, y_train, X_test, y_test = (
+            X_train, y_train, X_val, y_val = (
                 train_array[:, :-1],  # Features for training
-                train_array[:, -1],  # Target for training
+                train_array[:, -1],  # Target (Classification Labels)
                 validation_array[:, :-1],  # Features for testing
-                validation_array[:, -1],  # Target for testing
+                validation_array[:, -1],  # Target for validation
             )
 
+            # Load model configuration
             model_configs = load_model_config()
-            # Initialize models and their parameters
-            models = {}
-            params = {}
 
-            for model_type, model_info in model_configs["models"].items():
-                try:
-                    model_class = model_info[
-                        "type"
-                    ]  # Extract class name (e.g., 'RandomForestRegressor')
-                    model_params = model_info.get("params", {})  # Extract parameters
+            # Extract the requested model's configuration
+            if model_name not in model_configs["models"]:
+                raise ValueError(f"Model {model_name} not found in configuration.")
 
-                    # Dynamically instantiate the model using `eval`
-                    models[model_type] = eval(model_class)(**model_params)
-                    params[model_type] = model_params
+            model_info = model_configs["models"][model_name]
+            model_class = model_info["type"]
+            constructor_params = model_info.get("constructor_params", {})
+            model_params = model_info.get("params", {})
 
-                    logging.info(
-                        f"Loaded model: {model_name} with params: {model_params}"
-                    )
-                except Exception as e:
-                    logging.error(f"Failed to initialize model {model_type}: {e}")
-                    raise CustomException(e)
+            # Merge constructor_params and model_params
+            all_params = {**constructor_params, **model_params}
 
-            # Evaluate all models
-            logging.info(
-                "Evaluating models with the provided training and validation data."
-            )
-            # Log the start of evaluation for the current model
-            logging.info(f"Evaluating model: {model_name}")
-            model = models.get(model_name, {})
-            hyper_params = params.get(model_name, {})
+            # Initialize only the selected model
+            try:
+                model = eval(model_class)(**all_params)
+                logging.info(f"Loaded model: {model_name} with params: {model_params}")
+            except Exception as e:
+                logging.error(f"Failed to initialize model {model_name}: {e}")
+                raise CustomException(e)
+
+            # Extract hyperparameters for GridSearchCV (if available)
+            hyper_params = model_info.get("params", {})
+
+            best_params = None
+            best_val_accuracy = None
 
             # Perform GridSearchCV if hyperparameters are provided
             if hyper_params:
@@ -86,40 +78,58 @@ class ModelTrainingService:
                     estimator=model,
                     param_grid=hyper_params,
                     cv=3,
-                    scoring="r2",
+                    scoring="accuracy",  # Classification metric
                     n_jobs=-1,
                     verbose=1,
                 )
                 gs.fit(X_train, y_train)
 
-                # Update the model with the best parameters
-                model.set_params(**gs.best_params_)
+                # Combine constructor_params and best_params from GridSearchCV
+                if gs.best_params_:
+                    all_params = {**constructor_params, **gs.best_params_}
 
-            # Train the model
-            model.fit(X_train, y_train)
+                    # Re-instantiate the model with best parameters and retrain
+                    model = eval(model_class)(**all_params)
+                    model.fit(X_train, y_train)
+
+                # Store the best parameters and validation accuracy
+                best_params = gs.best_params_
+                best_val_accuracy = gs.best_score_
 
             # Predictions and scoring
             y_train_pred = model.predict(X_train)
-            y_test_pred = model.predict(X_test)
+            y_val_pred = model.predict(X_val)
 
-            train_model_score = r2_score(y_train, y_train_pred)
-            test_model_score = r2_score(y_test, y_test_pred)
+            train_accuracy = accuracy_score(y_train, y_train_pred)
+            val_accuracy = accuracy_score(y_val, y_val_pred)
+
+            # Calculate prediction probabilities
+            if hasattr(model, "predict_proba"):
+                y_val_proba = model.predict_proba(X_val)
+                avg_confidence = np.mean(
+                    np.max(y_val_proba, axis=1)
+                )  # Take highest probability per sample
+            else:
+                avg_confidence = None  # If model doesn't support probability
 
             # Log scores for the model
             logging.info(
-                f"Model: {model_name} | Train R2: {train_model_score:.4f} | Validation R2: {test_model_score:.4f}"
+                f"Model: {model_name} | Train Accuracy: {train_accuracy:.4f} | Validation Accuracy: {val_accuracy:.4f} | Avg Confidence: {avg_confidence:.4f}"
             )
 
             train_results = {
                 "model": model,
                 "model_name": model_name,
-                "train_r2": train_model_score,
-                "validation_r2": test_model_score,
+                "train_accuracy": train_accuracy,
+                "validation_accuracy": val_accuracy,
+                "avg_confidence": float(avg_confidence),
+                "best_params": best_params,
+                "best_val_accuracy": best_val_accuracy,
             }
 
             self.logger.info("Model training completed successfully.")
-
             return train_results
+
         except Exception as e:
             self.logger.error(f"Error during model training: {e}")
-            raise
+            raise CustomException(e)

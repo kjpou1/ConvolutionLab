@@ -1,56 +1,71 @@
 models:
-  CatBoosting Regressor:
-    type: CatBoostRegressor
-    params:
-      depth: [4, 5]  
-      learning_rate: [0.034]  # Small boost to refine learning  
-      iterations: [2500, 2700]  
-      l2_leaf_reg: [150, 190, 230]  
-      bagging_temperature: [4.8, 5.3]  
-    verbose: False
-    train_dir: artifacts/catboost_training
-
-  XGBRegressor:
-    type: XGBRegressor
-    params:
-      learning_rate: [0.065]  
-      n_estimators: [2500, 2700]  
-      max_depth: [5, 6]  
-      subsample: [0.78, 0.82]  
-      colsample_bytree: [0.72, 0.78]  # Increasing feature selection diversity  
-      reg_alpha: [28, 30]  
-      reg_lambda: [30, 38]  
-      min_child_weight: [4, 6]  # More flexible splits for recall improvement  
-
   Random Forest:
-    type: RandomForestRegressor
+    type: RandomForestClassifier
     params:
-      max_depth: [3, 5, 10]  # Reduce depth to prevent overfitting
-      min_samples_split: [5, 10]  # Prevent small splits
-      min_samples_leaf: [2, 5, 10]  # Avoid tiny leaf nodes
+      n_estimators: [8, 16, 32, 64, 128, 256]
+      max_depth: [3, 5, 7, 10]
+      criterion: ["gini", "entropy"]
 
-  # Not suitable because of negative numbers
-  # Decision Tree:
-  #   type: DecisionTreeRegressor
-  #   params:
-  #     criterion: ["squared_error", "friedman_mse", "absolute_error", "poisson"]
-
-  # Not suitable
-  # Linear Regression:
-  #   type: LinearRegression
-  #   params: {}
+  Decision Tree:
+    type: DecisionTreeClassifier
+    params:
+      criterion: ["gini", "entropy"]
+      max_depth: [3, 5, 7, 10]
 
   Gradient Boosting:
-    type: GradientBoostingRegressor
+    type: GradientBoostingClassifier
     params:
       learning_rate: [0.1, 0.01, 0.05, 0.001]
-      subsample: [0.8, 0.85, 0.9]  # Increasing randomness to reduce overfitting
-      n_estimators: [64, 128, 256]  # Keeping stable
-      max_depth: [3, 4]  # Limiting tree growth to prevent overfitting
-      min_samples_split: [10, 15]  # Forcing larger splits
+      subsample: [0.6, 0.7, 0.75, 0.8, 0.85, 0.9]
+      n_estimators: [8, 16, 32, 64, 128, 256]
 
-  AdaBoost Regressor:
-    type: AdaBoostRegressor
+  Logistic Regression:
+    type: LogisticRegression
     params:
-      learning_rate: [0.05, 0.1, 0.2]  
-      n_estimators: [256, 512, 1024]  
+      solver: ["lbfgs", "liblinear"]
+      max_iter: [100, 500, 1000]
+
+  XGBClassifier:
+    type: XGBClassifier
+    params:
+      learning_rate: [0.1, 0.01, 0.05, 0.001]
+      n_estimators: [8, 16, 32, 64, 128, 256]
+      max_depth: [3, 5, 7]
+      subsample: [0.8, 1.0]
+      colsample_bytree: [0.8, 1.0]
+      objective: ["multi:softmax"]
+      num_class: [3]
+
+  CatBoostClassifier:
+    type: CatBoostClassifier
+    verbose: False
+    constructor_params:  
+      loss_function: MultiClass
+      logging_level : Info      #Verbose
+      train_dir: artifacts/logs/catboost_training
+    params:
+      depth: [6, 8]  # ✅ Reduce depth to avoid overfitting
+      learning_rate: [0.01, 0.05]  # ✅ Slightly lower learning rate
+      iterations: [300, 500]  # ✅ Increase boosting rounds for better generalization
+      l2_leaf_reg: [7, 10, 15]  # ✅ Stronger regularization to prevent memorization
+
+  LightGBM:
+    type: LGBMClassifier
+    constructor_params:
+      objective: multiclass  
+      verbose: -1 
+      force_col_wise: True
+    params:
+      num_leaves: [15, 31]  # ✅ Reduce complexity for small datasets
+      learning_rate: [0.05, 0.1]  # ✅ Prevent slow learning
+      n_estimators: [100, 200]  # ✅ More boosting rounds
+      max_depth: [4, 5, 6]  # ✅ Force more tree depth
+      min_gain_to_split: [0.0001, 0.001]  # ✅ Allow small gain splits
+      min_data_in_leaf: [5, 10, 20]  # ✅ Reduce minimum samples per leaf
+
+
+  AdaBoostClassifier:
+    type: AdaBoostClassifier
+    params:
+      learning_rate: [0.1, 0.01, 0.5, 0.001]
+      n_estimators: [8, 16, 32, 64, 128, 256]

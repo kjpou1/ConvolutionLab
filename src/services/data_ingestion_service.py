@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-import src.utils.leavitt_utils as lu
+import src.indicators.leavitt_indicator as lu
 from src.exception import CustomException
 from src.logger_manager import LoggerManager
 from src.models.data_ingestion_config import DataIngestionConfig
@@ -37,22 +37,20 @@ class DataIngestionService:
         for lag in lag_periods:
             df[f"Returns_T-{lag}"] = df["Returns"].shift(lag)
 
-        future_periods = [1, 2, 5, 10, 21]
-        for future in future_periods:
-            df[f"Target_T+{future}"] = df["Close"].pct_change(future).shift(-future)
+        # REMOVE Future Returns to Avoid Data Leakage
+        # These target columns must ONLY be used for model evaluation, NOT as features.
+        # future_periods = [1, 2, 5, 10, 21]
+        # for future in future_periods:
+        #     df[f"Target_T+{future}"] = df["Close"].pct_change(future).shift(-future)
 
         # Momentum factors
         for lag in lag_periods:
             df[f"Momentum_T-{lag}"] = df["Returns"].sub(df["Returns"].shift(lag))
 
         # Time-based features
-        # Feature Importance
         df["Hour"] = pd.to_datetime(df.index).hour
-        # Feature Importance
         df["Day_Of_Week"] = pd.to_datetime(df.index).dayofweek
-        # Feature Importance
         df["Month"] = pd.to_datetime(df.index).month
-        # Feture Importance
         df["Year"] = pd.to_datetime(df.index).year
 
         return df
@@ -80,6 +78,19 @@ class DataIngestionService:
         df["Convolution_Probability"] = lu.convolution_probability(
             df["LC_Slope"], df["LC_Intercept"], window=10
         )
+        # Define Delta (But Do NOT Use It as a Feature)
+        df["Delta_Close_LC"] = df["Close"].shift(-1) - df["Leavitt_Convolution"]
+
+        # Convert Delta into Classification Labels (2 = Up, 1 = Flat, 0 = Down)
+        df["Movement_Class"] = np.where(
+            df["Delta_Close_LC"] > 0.002,
+            2,  # Up
+            np.where(df["Delta_Close_LC"] < -0.002, 0, 1),  # Down or Flat
+        )
+
+        # Drop Future-Leaking Column (DO NOT USE THIS AS A FEATURE)
+        df.drop(columns=["Delta_Close_LC"], inplace=True)
+
         return df
 
     def preprocess_data(self, df: pd.DataFrame):
@@ -158,10 +169,6 @@ class DataIngestionService:
             df.dropna(subset=columns_to_clean, inplace=True)
             logging.info(f"Dropped NaNs from all columns except Target_T+* fields.")
 
-            # **Set Projected_Direction as the Target**
-            df["Projected_Direction"] = np.sign(df["Leavitt_Convolution"] - df["Close"])
-            logging.info("Calculated `Projected_Direction` as the target variable.")
-
             return df
 
         except Exception as e:
@@ -200,11 +207,11 @@ class DataIngestionService:
                 "Momentum_T-5",
                 "Momentum_T-10",
                 "Momentum_T-21",
-                # "Returns_T-1",
-                # "Returns_T-2",
-                # "Returns_T-5",
-                # "Returns_T-10",
-                # "Returns_T-21",
+                "Returns_T-1",
+                "Returns_T-2",
+                "Returns_T-5",
+                "Returns_T-10",
+                "Returns_T-21",
                 "Hour",
                 "Day_Of_Week",
                 "Month",

@@ -31,7 +31,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "launch_host.py",
-            "args": ["train", "--model-type", "XGBRegressor"],
+            "args": ["train", "--model-type", "CatBoostClassifier"],
         },
         {
             "name": "Train Best",

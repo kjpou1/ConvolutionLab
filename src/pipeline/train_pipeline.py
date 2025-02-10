@@ -2,6 +2,8 @@ import os
 import sys
 from datetime import datetime
 
+from sklearn.metrics import accuracy_score
+
 from src.config.config import Config
 from src.exception import CustomException
 from src.logger_manager import LoggerManager
@@ -28,38 +30,33 @@ class TrainPipeline:
             logging.info("Starting data ingestion.")
             train_path, validation_path, _, _ = (
                 self.data_ingestion_service.initiate_data_ingestion(
-                    "Projected_Direction"
-                )
+                    "Movement_Class"
+                )  # Use Movement_Class as the target
             )
             logging.info(
-                f"Data ingested. Train: {train_path}, Validatoin: {validation_path}"
+                f"Data ingested. Train: {train_path}, Validation: {validation_path}"
             )
 
             # Step 2: Data Transformation
             logging.info("Starting data transformation.")
             train_arr, validation_arr, preprocessor_path = (
                 self.data_transformation_service.initiate_data_transformation(
-                    train_path, validation_path, target_column="Projected_Direction"
+                    train_path, validation_path, target_column=self.config.target_column
                 )
             )
-
             logging.info(
                 f"Data transformed and preprocessor saved at: {preprocessor_path}"
             )
 
-            # Initialize an empty model_report to capture scores for all models
+            # Initialize an empty model_report to capture accuracy scores for all models
             model_report = {}
             model_instances = {}
 
             # Step 3: Model Training and Selection
             logging.info("Starting model training and selection.")
             model_configs = load_model_config()
-            # Initialize models and their parameters
-            models = {}
-            params = {}
 
             models_to_train = []
-            # Determine models to train
             if self.config.best_of_all:
                 logging.info("Training all models to find the best.")
                 for model_type, _ in model_configs["models"].items():
@@ -67,37 +64,33 @@ class TrainPipeline:
             elif self.config.model_type:
                 model_type = self.config.model_type
                 logging.info(f"Training specified models: {model_type}")
-                # models_to_train = [
-                #     model for model in model_type if model in self.model_names
-                # ]
                 models_to_train = self.config.model_type
                 if not models_to_train:
                     raise ValueError(
-                        f"Invalid model_type(s) provided: {model_type}. "
-                        f"Available models: {self.model_names}"
+                        f"Invalid model_type(s) provided: {model_type}. Available models: {self.model_names}"
                     )
             else:
                 raise ValueError(
                     "You must specify either --model_type or --best_of_all."
                 )
 
-            # for model_type, model_info in model_configs["models"].items():
             for model_type in models_to_train:
                 train_results = self.model_training_service.train_and_validate(
                     model_type, train_arr, validation_arr
                 )
                 model_report[model_type] = {
-                    "train_r2": train_results["train_r2"],
-                    "validation_r2": train_results["validation_r2"],
+                    "train_accuracy": train_results["train_accuracy"],
+                    "validation_accuracy": train_results["validation_accuracy"],
+                    "avg_confidence": train_results["avg_confidence"],
                 }
                 model_instances[model_type] = {
                     "model": train_results["model"],
                 }
                 logging.info(f"Results for {model_type}: {train_results}")
 
-            # Once all models are trained, select the best one based on test_r2
+            # Select the best model based on validation accuracy
             best_model_name = max(
-                model_report, key=lambda m: model_report[m]["validation_r2"]
+                model_report, key=lambda m: model_report[m]["validation_accuracy"]
             )
             best_model_results = model_report[best_model_name]
             best_model = model_instances[best_model_name]["model"]
@@ -106,12 +99,13 @@ class TrainPipeline:
             history_entry = {
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "model": best_model_name,
-                "train_r2": best_model_results["train_r2"],
-                "validation_r2": best_model_results["validation_r2"],
+                "train_accuracy": best_model_results["train_accuracy"],
+                "validation_accuracy": best_model_results["validation_accuracy"],
+                "avg_confidence": best_model_results["avg_confidence"],
                 "model_report": model_report,
             }
 
-            # Append to the centralized training history file
+            # Append to training history file
             update_training_history(history_entry)
             logging.info(f"Training history updated: {history_entry}")
 
