@@ -82,7 +82,7 @@ class Host:
         """
         data_ingestion_service = DataIngestionService()
         data_ingestion_service.initiate_data_ingestion(
-            target_column="Projected_Direction"
+            target_column=self.config.target_column
         )
 
     async def run_training(self):

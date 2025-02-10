@@ -27,6 +27,9 @@ class Config(metaclass=SingletonMeta):
         self._best_of_all = False  # Default value for best_of_all
         self._save_best = False  # Default value for save_best
         self._input_data_file_path = os.getenv("INPUT_DATA_FILE_PATH", "data/data.csv")
+        self._target_column = os.getenv(
+            "TARGET_COLUMN", "Target_T+1"
+        )  # Default target column
 
         # Base directory for artifacts
         self.BASE_DIR = os.getenv("BASE_DIR", "artifacts")
@@ -34,19 +37,16 @@ class Config(metaclass=SingletonMeta):
         # Subdirectories for artifacts
         self.RAW_DATA_DIR = os.path.join(self.BASE_DIR, "data", "raw")
         self.MODEL_DIR = os.path.join(self.BASE_DIR, "models")
-        self.MODEL_FILE_PATH = os.path.join(
-            self.MODEL_DIR, "model.pkl"
-        )  # Training history directory
+        self.MODEL_FILE_PATH = os.path.join(self.MODEL_DIR, "model.pkl")
+        self.CONFIDENCE_RANGE_FILE_PATH = os.path.join(
+            self.MODEL_DIR, "confidence_range.pkl"
+        )
         self.PREPROCESSOR_FILE_PATH = os.path.join(self.BASE_DIR, "preprocessor.pkl")
         self.LOG_DIR = os.path.join(self.BASE_DIR, "logs")
-        self.HISTORY_DIR = os.path.join(
-            self.BASE_DIR, "history"
-        )  # Training history directory
-
+        self.HISTORY_DIR = os.path.join(self.BASE_DIR, "history")
         self.HISTORY_FILE_PATH = os.path.join(
             self.BASE_DIR, "history", "training_history.json"
-        )  # Training history directory
-
+        )
         self.REPORTS_DIR = os.path.join(self.BASE_DIR, "reports")
         self.PROCESSED_DATA_DIR = os.path.join(self.BASE_DIR, "data", "processed")
 
@@ -69,6 +69,18 @@ class Config(metaclass=SingletonMeta):
         ]
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
+
+    @property
+    def target_column(self):
+        """Get the target column."""
+        return self._target_column
+
+    @target_column.setter
+    def target_column(self, value):
+        """Set the target column."""
+        if not isinstance(value, str):
+            raise ValueError("target_column must be a string.")
+        self._target_column = value
 
     @property
     def config_path(self):
