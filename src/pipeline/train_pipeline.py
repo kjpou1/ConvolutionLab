@@ -10,6 +10,7 @@ from src.logger_manager import LoggerManager
 from src.services.data_ingestion_service import DataIngestionService
 from src.services.data_transformation_service import DataTransformationService
 from src.services.model_training_service import ModelTrainingService
+from src.services.report_service import ReportService
 from src.utils.file_utils import save_json, save_object
 from src.utils.history_utils import append_training_history, update_training_history
 from src.utils.yaml_loader import load_model_config
@@ -79,9 +80,9 @@ class TrainPipeline:
                     model_type, train_arr, validation_arr
                 )
                 model_report[model_type] = {
-                    "train_accuracy": train_results["train_accuracy"],
-                    "validation_accuracy": train_results["validation_accuracy"],
-                    "avg_confidence": train_results["avg_confidence"],
+                    "performance_metrics": train_results["performance_metrics"],
+                    "best_params": train_results["best_params"],
+                    "best_val_accuracy": train_results["best_val_accuracy"],
                 }
                 model_instances[model_type] = {
                     "model": train_results["model"],
@@ -90,7 +91,10 @@ class TrainPipeline:
 
             # Select the best model based on validation accuracy
             best_model_name = max(
-                model_report, key=lambda m: model_report[m]["validation_accuracy"]
+                model_report,
+                key=lambda m: model_report[m]["performance_metrics"][
+                    "validation_accuracy"
+                ],
             )
             best_model_results = model_report[best_model_name]
             best_model = model_instances[best_model_name]["model"]
@@ -99,9 +103,9 @@ class TrainPipeline:
             history_entry = {
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "model": best_model_name,
-                "train_accuracy": best_model_results["train_accuracy"],
-                "validation_accuracy": best_model_results["validation_accuracy"],
-                "avg_confidence": best_model_results["avg_confidence"],
+                "performance_metrics": best_model_results["performance_metrics"],
+                "best_params": best_model_results["best_params"],
+                "best_val_accuracy": best_model_results["best_val_accuracy"],
                 "model_report": model_report,
             }
 
