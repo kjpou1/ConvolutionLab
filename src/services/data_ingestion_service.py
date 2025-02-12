@@ -20,7 +20,7 @@ def calculate_atr(df, period=14):
     df["high_close"] = (df["High"] - df["previous_close"]).abs()
     df["low_close"] = (df["Low"] - df["previous_close"]).abs()
     df["true_range"] = df[["high_low", "high_close", "low_close"]].max(axis=1)
-    df["ATR"] = df["true_range"].rolling(window=period).mean()
+    df["ATR"] = df["true_range"].ewm(span=period, adjust=False).mean()  # (EMA)
 
     # Drop intermediate columns
     df.drop(
