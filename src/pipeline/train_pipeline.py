@@ -83,11 +83,12 @@ class TrainPipeline:
                     "performance_metrics": train_results["performance_metrics"],
                     "best_params": train_results["best_params"],
                     "best_val_accuracy": train_results["best_val_accuracy"],
+                    "validation_report": train_results["validation_report"],
                 }
                 model_instances[model_type] = {
                     "model": train_results["model"],
                 }
-                logging.info(f"Results for {model_type}: {train_results}")
+                # logging.debug(f"Results for {model_type}: {train_results}")
 
             # Select the best model based on validation accuracy
             best_model_name = max(
@@ -106,12 +107,13 @@ class TrainPipeline:
                 "performance_metrics": best_model_results["performance_metrics"],
                 "best_params": best_model_results["best_params"],
                 "best_val_accuracy": best_model_results["best_val_accuracy"],
+                "validation_report": best_model_results["validation_report"],
                 "model_report": model_report,
             }
 
             # Append to training history file
             update_training_history(history_entry)
-            logging.info(f"Training history updated: {history_entry}")
+            # logging.info(f"Training history updated: {history_entry}")
 
             if self.config.save_best:
                 save_object(self.config.MODEL_FILE_PATH, best_model)

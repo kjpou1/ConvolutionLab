@@ -15,10 +15,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
+    confusion_matrix,
     precision_recall_fscore_support,
 )
 from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.utils import compute_sample_weight
 from xgboost import XGBClassifier
 
 from src.config.config import Config
@@ -110,70 +112,6 @@ class ModelTrainingService:
             self.logger.error(f"Error during model training: {e}")
             raise CustomException(e)
 
-    # def plot_learning_curve(
-    #     model,
-    #     X_train,
-    #     y_train,
-    #     X_val,
-    #     y_val,
-    #     # param_name="iterations",
-    #     pIterations
-    #     max_iter=300,
-    #     step_size=10,
-    # ):
-    #     """
-    #     Plot learning curve by varying the number of iterations (or n_estimators).
-    #     """
-    #     # Set the range of iterations
-    #     iterations_range = list(range(1, pIterations)) # max_iter + 1, step_size))
-
-    #     # Store metrics for each iteration
-    #     train_accuracies = []
-    #     val_accuracies = []
-    #     train_errors = []
-    #     val_errors = []
-
-    #     for iterations in iterations_range:
-    #         # Update the model with the current iteration
-    #         model.set_params(**{param_name: iterations})
-
-    #         # Train the model with the current iteration
-    #         model.fit(X_train, y_train)
-
-    #         # Get predictions
-    #         y_train_pred = model.predict(X_train)
-    #         y_val_pred = model.predict(X_val)
-
-    #         # Calculate accuracy and error
-    #         train_accuracy = accuracy_score(y_train, y_train_pred)
-    #         val_accuracy = accuracy_score(y_val, y_val_pred)
-    #         train_error = 1 - train_accuracy
-    #         val_error = 1 - val_accuracy
-
-    #         # Store metrics
-    #         train_accuracies.append(train_accuracy)
-    #         val_accuracies.append(val_accuracy)
-    #         train_errors.append(train_error)
-    #         val_errors.append(val_error)
-
-    #     # Plot learning curve
-    #     plt.figure(figsize=(10, 6))
-    #     plt.plot(
-    #         iterations_range, train_accuracies, label="Train Accuracy", color="blue"
-    #     )
-    #     plt.plot(
-    #         iterations_range, val_accuracies, label="Validation Accuracy", color="green"
-    #     )
-    #     plt.xlabel(f"{param_name.capitalize()}")
-    #     plt.ylabel("Accuracy")
-    #     plt.title(f"Learning Curve: {param_name.capitalize()} vs Accuracy")
-    #     plt.legend()
-    #     plt.grid(True)
-    #     # plt.show()
-
-    #     plt.savefig("plot.png")  # Save as PNG file
-    #     return train_accuracies, val_accuracies, train_errors, val_errors
-
     def _get_model_info(self, model_name, model_configs):
         """Helper function to extract model configuration"""
         if model_name not in model_configs["models"]:
@@ -203,6 +141,9 @@ class ModelTrainingService:
         best_params = None
         best_val_accuracy = None
 
+        # Compute sample weights for imbalanced data
+        sample_weights = compute_sample_weight(class_weight="balanced", y=y_train)
+
         if hyper_params:
             gs = GridSearchCV(
                 estimator=model,
@@ -212,10 +153,7 @@ class ModelTrainingService:
                 n_jobs=-1,
                 verbose=1,
             )
-            gs.fit(
-                X_train,
-                y_train,
-            )
+            gs.fit(X_train, y_train, sample_weight=sample_weights)
 
             # Combine constructor_params and best_params from GridSearchCV
             constructor_params = model_info.get("constructor_params", {})
@@ -225,7 +163,9 @@ class ModelTrainingService:
                 # Re-instantiate the model with the best parameters and retrain
                 all_params = {**constructor_params, **gs.best_params_}
                 model = eval(model_class)(**all_params)  # Re-instantiate model
-                model.fit(X_train, y_train)  # Fit the new model
+                model.fit(
+                    X_train, y_train, sample_weight=sample_weights
+                )  # Fit the new model
 
             best_params = gs.best_params_
             best_val_accuracy = gs.best_score_

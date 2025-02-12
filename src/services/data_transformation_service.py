@@ -59,6 +59,13 @@ class DataTransformationService:
                 "Returns_T-5",
                 "Returns_T-10",
                 "Returns_T-21",
+                "AHMA",
+                "ATR",
+                "Volume",
+                "Open",
+                "High",
+                "Low",
+                "Close",
             ]
 
             # Feature Importance

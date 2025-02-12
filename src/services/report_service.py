@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from catboost import CatBoostClassifier
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import StratifiedKFold
 
 
@@ -13,6 +13,7 @@ class ReportService:
         self.y_train = y_train
         self.X_val = X_val
         self.y_val = y_val
+        self.y_val_pred = self.model.predict(self.X_val)
 
     def run_cross_validation(self):
         """
@@ -72,8 +73,7 @@ class ReportService:
         """
         Generate classification report for model evaluation.
         """
-        y_val_pred = self.model.predict(self.X_val)
-        report = classification_report(self.y_val, y_val_pred)
+        report = classification_report(self.y_val, self.y_val_pred)
         print("Classification Report:\n", report)
         return report
 
@@ -87,11 +87,26 @@ class ReportService:
         # Learning curve plot (only for tree-based models)
         self.plot_learning_curves()
 
+        # Confusion Matrix
+        conf_matrix = confusion_matrix(self.y_val, self.y_val_pred)
+        print("Confusion Matrix:\n", conf_matrix)
         # Classification report
         classification_report_str = self.generate_classification_report()
 
+        # Count the instances of each class in training labels
+        class_counts = pd.Series(self.y_train).value_counts()
+        print("Class Distribution in Training Set:")
+        print(class_counts)
+
+        # Calculate class ratios
+        total_samples = len(self.y_train)
+        class_ratios = class_counts / total_samples
+        print("\nClass Ratios:")
+        print(class_ratios)
+
         report = {
             "avg_val_accuracy": avg_val_accuracy,
+            "confusion_matrix": conf_matrix.tolist(),
             "classification_report": classification_report_str,
         }
 
