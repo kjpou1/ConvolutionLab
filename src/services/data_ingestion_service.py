@@ -7,79 +7,13 @@ from sklearn.model_selection import train_test_split
 
 import src.indicators.leavitt_indicator as lu
 from src.exception import CustomException
+from src.indicators.atr import calculate_atr
+from src.indicators.movement import classify_movement
 from src.logger_manager import LoggerManager
 from src.models.data_ingestion_config import DataIngestionConfig
 from src.services.data_split_service import DataSplitService
 
 logging = LoggerManager.get_logger(__name__)
-
-
-def calculate_atr(df, period=14):
-    df["previous_close"] = df["Close"].shift(1)
-    df["high_low"] = df["High"] - df["Low"]
-    df["high_close"] = (df["High"] - df["previous_close"]).abs()
-    df["low_close"] = (df["Low"] - df["previous_close"]).abs()
-    df["true_range"] = df[["high_low", "high_close", "low_close"]].max(axis=1)
-    df["ATR"] = df["true_range"].ewm(span=period, adjust=False).mean()  # (EMA)
-
-    # Drop intermediate columns
-    df.drop(
-        ["previous_close", "high_low", "high_close", "low_close", "true_range"],
-        axis=1,
-        inplace=True,
-    )
-
-    return df
-
-
-def calculate_dynamic_atr_multiplier(df, period=14, scale_factor=20.25):
-    # Calculate rolling standard deviation of ATR
-    df["atr_std"] = df["ATR"].rolling(window=period).std()
-
-    # Set dynamic ATR multiplier based on ATR standard deviation (volatility)
-    df["dynamic_atr_multiplier"] = (
-        scale_factor + (df["atr_std"] / df["ATR"].mean()) * 0.5
-    )
-    return df
-
-
-def classify_movement(df, period=14, scale_factor=0.25):
-    # Calculate ATR first
-    df = calculate_atr(df, period)
-
-    # Calculate dynamic ATR multiplier
-    df = calculate_dynamic_atr_multiplier(df, period, scale_factor)
-
-    # Calculate price change
-    df["price_change"] = df["Close"].diff()
-
-    # Define dynamic volatility thresholds using the dynamic multiplier
-    df["dynamic_volatility_threshold"] = df["ATR"] * df["dynamic_atr_multiplier"]
-
-    # Classify movements based on dynamic thresholds
-    df["Movement_Class"] = np.where(
-        df["price_change"] > df["dynamic_volatility_threshold"],
-        2,  # Up (strong move)
-        np.where(
-            df["price_change"] < -df["dynamic_volatility_threshold"],
-            0,  # Down (strong move)
-            1,  # Neutral (within volatility threshold)
-        ),
-    )
-
-    # Drop unnecessary columns
-    df.drop(
-        [
-            "price_change",
-            "dynamic_volatility_threshold",
-            "atr_std",
-            "dynamic_atr_multiplier",
-        ],
-        axis=1,
-        inplace=True,
-    )
-
-    return df
 
 
 class DataIngestionService:
