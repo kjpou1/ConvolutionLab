@@ -7,10 +7,11 @@ from sklearn.model_selection import train_test_split
 
 import src.indicators.leavitt_indicator as lu
 from src.exception import CustomException
-from src.indicators.atr import calculate_atr
+from src.indicators.feature_engineering import compute_indicators, compute_leavitt_data
 from src.indicators.movement import classify_movement
 from src.logger_manager import LoggerManager
 from src.models.data_ingestion_config import DataIngestionConfig
+from src.models.data_processing_error import DataProcessingError
 from src.services.data_split_service import DataSplitService
 
 logging = LoggerManager.get_logger(__name__)
@@ -28,80 +29,6 @@ class DataIngestionService:
         """
         self.ingestion_config = DataIngestionConfig()
         self.data_split_service = DataSplitService()
-
-    # Function to calculate the Average True Range (ATR)
-
-    def compute_indicators(self, df: pd.DataFrame):
-        """Calculate returns, indicators, and normalize the data with standardized column names."""
-
-        # Calculate returns
-        df["Returns"] = df["Close"].pct_change()
-
-        lag_periods = [1, 2, 5, 10, 21]
-        for lag in lag_periods:
-            df[f"Returns_T-{lag}"] = df["Returns"].shift(lag)
-
-        # REMOVE Future Returns to Avoid Data Leakage
-        # These target columns must ONLY be used for model evaluation, NOT as features.
-        # future_periods = [1, 2, 5, 10, 21]
-        # for future in future_periods:
-        #     df[f"Target_T+{future}"] = df["Close"].pct_change(future).shift(-future)
-
-        # Momentum factors
-        for lag in lag_periods:
-            df[f"Momentum_T-{lag}"] = df["Returns"].sub(df["Returns"].shift(lag))
-
-        # Time-based features
-        df["Hour"] = pd.to_datetime(df.index).hour
-        df["Day_Of_Week"] = pd.to_datetime(df.index).dayofweek
-        df["Month"] = pd.to_datetime(df.index).month
-        df["Year"] = pd.to_datetime(df.index).year
-
-        return df
-
-    def compute_leavitt_data(self, df: pd.DataFrame):
-        # Compute AHMA with period 9
-        ahma_period = 9
-
-        df["AHMA"] = lu.adaptive_hull_moving_average(df["Close"], ahma_period)
-
-        # Apply Feature Engineering using AHMA as input instead of Close
-        plength = 9  # Projection lookback period
-        clength = 3  # Convolution lookback period
-
-        df["Leavitt_Projection"] = lu.leavitt_projection(df["AHMA"], plength)
-
-        (
-            df["Leavitt_Convolution"],
-            df["LC_Slope"],
-            df["LC_Intercept"],
-        ) = lu.leavitt_convolution(df["AHMA"], plength, clength)
-
-        df["LC_Acceleration"] = lu.leavitt_acceleration(df["LC_Slope"])
-
-        df["Convolution_Probability"] = lu.convolution_probability(
-            df["LC_Slope"], df["LC_Intercept"], window=10
-        )
-        # Define Delta (But Do NOT Use It as a Feature)
-        # df["Delta_Close_LC"] = df["Close"].shift(-1) - df["Leavitt_Convolution"]
-
-        # Convert Delta into Classification Labels (2 = Up, 1 = Flat, 0 = Down)
-        # df["Movement_Class"] = np.where(
-        #     df["Delta_Close_LC"] > 0.004,  # More strict for Up
-        #     2,
-        #     np.where(df["Delta_Close_LC"] < -0.003, 0, 1),  # More strict for Down
-        # )
-        # df["Movement_Class"] = np.where(
-        #     df["Delta_Close_LC"] > 0.005,  # More strict for Up
-        #     2,
-        #     np.where(df["Delta_Close_LC"] < -0.005, 0, 1),  # More strict for Down
-        # )
-
-        # Drop Future-Leaking Column (DO NOT USE THIS AS A FEATURE)
-        # df.drop(columns=["Delta_Close_LC"], inplace=True)
-        df = classify_movement(df)
-
-        return df
 
     def preprocess_data(self, df: pd.DataFrame):
         """
@@ -132,9 +59,10 @@ class DataIngestionService:
                 "ask_l",
                 "ask_c",
             ]
-            df = df.drop(
+            df.drop(
                 columns=[col for col in columns_to_drop if col in df.columns],
                 errors="ignore",
+                inplace=True,
             )
             logging.info("Dropped bid and ask price columns.")
 
@@ -165,12 +93,16 @@ class DataIngestionService:
             logging.info("Set index to Date with unique timestamps.")
 
             logging.info("Processing leavitt data.")
-            df = self.compute_leavitt_data(df)
+            df = compute_leavitt_data(df)
             logging.info("Finished leavitt data.")
 
             logging.info("Processing indicators.")
-            df = self.compute_indicators(df)
+            df = compute_indicators(df)
             logging.info("Finished indicators.")
+
+            logging.info("Processing target.")
+            df = classify_movement(df)
+            logging.info("Finished target.")
 
             # **Drop NaNs from all columns except future target fields ("Target_T+*")**
             columns_to_clean = [
@@ -179,7 +111,19 @@ class DataIngestionService:
             df.dropna(subset=columns_to_clean, inplace=True)
             logging.info(f"Dropped NaNs from all columns except Target_T+* fields.")
 
+            if df.isnull().all().sum() > 0:
+                raise DataProcessingError("All rows contain NaNs after processing!")
+
+            logging.info(f"[Data Preprocessing] Input Data Shape: {df.shape}")
+            logging.info(
+                f"[Data Preprocessing] Checking for NaNs: {df.isnull().sum().sum()} NaNs found"
+            )
+
             return df
+
+        except DataProcessingError as e:
+            logging.error(f"Data Processing Error: {e}")
+            raise CustomException(e, sys) from e
 
         except Exception as e:
             raise CustomException(e, sys) from e

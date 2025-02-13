@@ -23,8 +23,5 @@ def calculate_atr(df, period=14):
     )
 
     # Apply EMA to True Range to calculate ATR
-    df["ATR"] = (
-        pd.Series(true_range, index=df.index).ewm(span=period, adjust=False).mean()
-    )
-
-    return df
+    atr = pd.Series(true_range, index=df.index).ewm(span=period, adjust=False).mean()
+    return atr

@@ -1,7 +1,5 @@
 import numpy as np
 
-from src.indicators.atr import calculate_atr
-
 
 def classify_movement(df, period=14, scale_factor=0.25):
     """
@@ -15,8 +13,6 @@ def classify_movement(df, period=14, scale_factor=0.25):
     Returns:
         pd.DataFrame: Updated DataFrame with 'Movement_Class'.
     """
-    # Ensure ATR is computed first
-    df = calculate_atr(df, period)
 
     # Compute dynamic ATR multiplier
     df["atr_std"] = df["ATR"].rolling(window=period).std()
