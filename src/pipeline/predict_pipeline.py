@@ -1,11 +1,13 @@
 import os
 import sys
+from collections import namedtuple
 
 import pandas as pd
 
 from src.config.config import Config
 from src.exception import CustomException
 from src.logger_manager import LoggerManager
+from src.services.data_ingestion_service import DataIngestionService
 from src.utils.file_utils import load_object
 
 logging = LoggerManager.get_logger(__name__)
@@ -20,6 +22,8 @@ class PredictPipeline:
             self.config = Config()
             model_path = self.config.MODEL_FILE_PATH
             preprocessor_path = self.config.PREPROCESSOR_FILE_PATH
+            self.ingestion_service = DataIngestionService()
+
             logging.info("Loading model and preprocessor.")
 
             # Load the model and preprocessor once during initialization
@@ -41,16 +45,29 @@ class PredictPipeline:
             np.ndarray: Predicted values.
         """
         try:
+
             logging.info("Starting prediction.")
 
+            logging.info("Computing necessary features.")
+            preprocessed_features = self.ingestion_service.preprocess_data(features)
+
             # Preprocess the features
-            data_scaled = self.preprocessor.transform(features)
+            data_scaled = self.preprocessor.transform(preprocessed_features)
             logging.info("Data transformed successfully.")
 
             # Make predictions
-            preds = self.model.predict(data_scaled)
+            y_hat = self.model.predict(data_scaled)
             logging.info("Prediction completed successfully.")
 
-            return preds
+            y_hat = y_hat.astype(int)
+            y_hat = y_hat.flatten()
+
+            y_proba = self.model.predict_proba(data_scaled)
+            y_confidence = y_proba.max(axis=1)
+            PredictionResult = namedtuple(
+                "PredictionResult", ["predictions", "confidence"]
+            )
+            return PredictionResult(y_hat, y_confidence)
+
         except Exception as e:
             raise CustomException(e, sys) from e
