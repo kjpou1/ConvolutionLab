@@ -145,6 +145,9 @@ def run_prediction(df):
 
     df_subset = df.tail(prediction_count).reset_index(drop=True)
     df_predictions = pd.DataFrame(result._asdict())
+    df_predictions = pd.DataFrame(result._asdict()).rename(
+        columns={"predictions": "Predictions", "confidence": "Confidence"}
+    )
     df_final = pd.concat([df_subset, df_predictions], axis=1)
 
     return df_final
