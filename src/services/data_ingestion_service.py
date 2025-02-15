@@ -86,7 +86,14 @@ class DataIngestionService:
 
             # Drop rows where 'Date' is NaN before setting index
             df = df.dropna(subset=["Date"])
-            df = df.set_index("Date")
+            # Ensure index is in datetime format
+            if not isinstance(df["Date"], pd.DatetimeIndex):
+                df["Date"] = pd.to_datetime(
+                    df["Date"]
+                )  # Convert 'Date' column if exists
+                df.set_index("Date", inplace=True)  # Set as index
+            else:
+                df = df.set_index("Date")
 
             # Remove duplicate timestamps to ensure unique index
             df = df[~df.index.duplicated(keep="first")]
