@@ -42,6 +42,7 @@ class DataTransformationService:
             ColumnTransformer: A transformer object that applies the preprocessing steps.
         """
         try:
+
             # **🔹 Dynamically Assign Numerical & Categorical Features**
             numerical_columns = [
                 "Leavitt_Projection",
@@ -70,7 +71,6 @@ class DataTransformationService:
 
             # Feature Importance
             categorical_columns = ["Day_Of_Week", "Month", "Year"]
-            # categorical_columns = ["Year"]
 
             # **🔹 Handle Hour Column Differently Based on Encoding Choice**
             if use_cyclical_encoding:

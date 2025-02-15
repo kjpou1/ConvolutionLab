@@ -170,6 +170,8 @@ class DataIngestionService:
                 "Day_Of_Week",
                 "Month",
                 "Year",
+                "AHMA",
+                "ATR",
             ]
             for feature in expected_features:
                 if feature not in numerical_features + categorical_features:
