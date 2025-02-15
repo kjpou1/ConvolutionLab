@@ -12,7 +12,7 @@ Unlike traditional price forecasting, where models attempt to predict **exact fu
 The classification process follows these steps:
 
 ### **1. Compute Price Change**
-$$ \text{Price Change} = \text{Close}(t) - \text{Close}(t-1) $$  
+$\text{Price Change} = \text{Close}(t) - \text{Close}(t-1)$
 This measures the **raw difference** between the current closing price and the previous closing price.
 
 ### **2. Calculate a Dynamic Volatility Threshold**
@@ -30,14 +30,11 @@ $$ \text{Dynamic Multiplier} = \text{Scale Factor} + \left(\frac{\text{Rolling S
 ### **3. Assign `Movement_Class` Based on Price Change vs. Threshold**
 Using the computed threshold, we classify price movement into three categories:
 
-$$
-\text{Movement\_Class} =
-\begin{cases} 
-2, & \text{if } \text{Price Change} > \text{Dynamic Volatility Threshold} \quad \text{(Strong Up Move)} \\
-0, & \text{if } \text{Price Change} < -\text{Dynamic Volatility Threshold} \quad \text{(Strong Down Move)} \\
-1, & \text{otherwise} \quad \text{(Neutral Movement)}
-\end{cases}
-$$
+| `Movement_Class` | Condition | Meaning |
+|-----------------|-------------------------------------------------|---------------------|
+| **2** | `Price Change > Dynamic Volatility Threshold` | **Strong Up Move** |
+| **0** | `Price Change < -Dynamic Volatility Threshold` | **Strong Down Move** |
+| **1** | *Otherwise* | **Neutral Movement** |
 
 ---
 
