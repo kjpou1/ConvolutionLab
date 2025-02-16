@@ -176,6 +176,10 @@ catboost_info/
 # Ignore logs directory
 logs/
 
+# Ignore data
+data/
+strategy
+
 # Ignore artifacts directory
 **/artifacts/*
 README for later.md
