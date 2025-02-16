@@ -1,13 +1,13 @@
 import numpy as np
 
 
-def classify_movement(df, period=14, scale_factor=0.25):
+def classify_movement(df, movement_period: int, scale_factor: float):
     """
     Classifies price movement based on ATR-derived volatility thresholds.
 
     Args:
         df (pd.DataFrame): Market data.
-        period (int): ATR period.
+        movement_period (int): ATR period for rolling volatility estimation.
         scale_factor (float): Multiplier for ATR dynamic threshold.
 
     Returns:
@@ -15,7 +15,7 @@ def classify_movement(df, period=14, scale_factor=0.25):
     """
 
     # Compute dynamic ATR multiplier
-    df["atr_std"] = df["ATR"].rolling(window=period).std()
+    df["atr_std"] = df["ATR"].rolling(window=movement_period).std()
     df["dynamic_atr_multiplier"] = (
         scale_factor + (df["atr_std"] / df["ATR"].mean()) * 0.5
     )

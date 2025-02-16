@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 import src.indicators.leavitt_indicator as lu
+from src.config.config import Config
 from src.exception import CustomException
 from src.indicators.feature_engineering import compute_indicators, compute_leavitt_data
 from src.indicators.movement import classify_movement
@@ -29,6 +30,7 @@ class DataIngestionService:
         """
         self.ingestion_config = DataIngestionConfig()
         self.data_split_service = DataSplitService()
+        self.config = Config()
 
     def preprocess_data(self, df: pd.DataFrame):
         """
@@ -100,15 +102,24 @@ class DataIngestionService:
             logging.info("Set index to Date with unique timestamps.")
 
             logging.info("Processing leavitt data.")
-            df = compute_leavitt_data(df)
+            df = compute_leavitt_data(
+                df,
+                ahma_window=self.config.ahma_window,
+                leavitt_proj_window=self.config.leavitt_proj_window,
+                leavitt_conv_window=self.config.leavitt_conv_window,
+            )
             logging.info("Finished leavitt data.")
 
             logging.info("Processing indicators.")
-            df = compute_indicators(df)
+            df = compute_indicators(df, atr_window=self.config.atr_window)
             logging.info("Finished indicators.")
 
             logging.info("Processing target.")
-            df = classify_movement(df)
+            df = classify_movement(
+                df,
+                movement_period=self.config.movement_period,
+                scale_factor=self.config.movement_scale_factor,
+            )
             logging.info("Finished target.")
 
             # **Drop NaNs from all columns except future target fields ("Target_T+*")**

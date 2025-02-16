@@ -31,6 +31,18 @@ class Config(metaclass=SingletonMeta):
             "TARGET_COLUMN", "Target_T+1"
         )  # Default target column
 
+        # Load Leavitt-related parameters
+        self._ahma_window = int(os.getenv("AHMA_WINDOW", 20))
+        self._leavitt_proj_window = int(os.getenv("LEAVITT_PROJ_WINDOW", 9))
+        self._leavitt_conv_window = int(os.getenv("LEAVITT_CONV_WINDOW", 5))
+
+        # ATR Window
+        self._atr_window = int(os.getenv("ATR_WINDOW", 14))
+
+        # Movement Classification Parameters
+        self._movement_period = int(os.getenv("MOVEMENT_PERIOD", 14))
+        self._movement_scale_factor = float(os.getenv("MOVEMENT_SCALE_FACTOR", 0.25))
+
         # Base directory for artifacts
         self.BASE_DIR = os.getenv("BASE_DIR", "artifacts")
 
@@ -153,6 +165,81 @@ class Config(metaclass=SingletonMeta):
         if not isinstance(value, str):
             raise ValueError("input_data_file_path must be a string.")
         self._input_data_file_path = value
+
+    # Getter and Setter for AHMA_WINDOW
+    @property
+    def ahma_window(self):
+        """Get AHMA window size."""
+        return self._ahma_window
+
+    @ahma_window.setter
+    def ahma_window(self, value):
+        """Set AHMA window size."""
+        if not isinstance(value, int) or value <= 0:
+            raise ValueError("AHMA window must be a positive integer.")
+        self._ahma_window = value
+
+    # Getter and Setter for LEAVITT_PROJ_WINDOW
+    @property
+    def leavitt_proj_window(self):
+        """Get Leavitt Projection window size."""
+        return self._leavitt_proj_window
+
+    @leavitt_proj_window.setter
+    def leavitt_proj_window(self, value):
+        """Set Leavitt Projection window size."""
+        if not isinstance(value, int) or value <= 0:
+            raise ValueError("Leavitt Projection window must be a positive integer.")
+        self._leavitt_proj_window = value
+
+    # Getter and Setter for LEAVITT_CONV_WINDOW
+    @property
+    def leavitt_conv_window(self):
+        """Get Leavitt Convolution window size."""
+        return self._leavitt_conv_window
+
+    @leavitt_conv_window.setter
+    def leavitt_conv_window(self, value):
+        """Set Leavitt Convolution window size."""
+        if not isinstance(value, int) or value <= 0:
+            raise ValueError("Leavitt Convolution window must be a positive integer.")
+        self._leavitt_conv_window = value
+
+    @property
+    def atr_window(self):
+        """Get ATR window size."""
+        return self._atr_window
+
+    @atr_window.setter
+    def atr_window(self, value):
+        """Set ATR window size."""
+        if not isinstance(value, int) or value <= 0:
+            raise ValueError("ATR window must be a positive integer.")
+        self._atr_window = value
+
+    @property
+    def movement_period(self):
+        """Get movement classification period."""
+        return self._movement_period
+
+    @movement_period.setter
+    def movement_period(self, value):
+        """Set movement classification period."""
+        if not isinstance(value, int) or value <= 0:
+            raise ValueError("Movement period must be a positive integer.")
+        self._movement_period = value
+
+    @property
+    def movement_scale_factor(self):
+        """Get scale factor for movement classification."""
+        return self._movement_scale_factor
+
+    @movement_scale_factor.setter
+    def movement_scale_factor(self, value):
+        """Set scale factor for movement classification."""
+        if not isinstance(value, float) or value <= 0:
+            raise ValueError("Movement scale factor must be a positive float.")
+        self._movement_scale_factor = value
 
     @classmethod
     def initialize(cls):

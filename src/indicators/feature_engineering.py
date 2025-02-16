@@ -4,7 +4,7 @@ import src.indicators.leavitt_indicator as lu
 from src.indicators.atr import calculate_atr
 
 
-def compute_indicators(df: pd.DataFrame, atr_period: int = 14):
+def compute_indicators(df: pd.DataFrame, atr_window: int = 14):
     """Computes returns, momentum, and time-based features."""
     df["Returns"] = df["Close"].pct_change()
     lag_periods = [1, 2, 5, 10, 21]
@@ -19,18 +19,22 @@ def compute_indicators(df: pd.DataFrame, atr_period: int = 14):
     df["Year"] = df.index.year
 
     # Ensure ATR is computed first
-    df["ATR"] = calculate_atr(df, period=atr_period)
+    df["ATR"] = calculate_atr(df, window=atr_window)
 
     return df
 
 
-def compute_leavitt_data(df: pd.DataFrame):
+def compute_leavitt_data(
+    df: pd.DataFrame,
+    ahma_window: int,
+    leavitt_proj_window: int,
+    leavitt_conv_window: int,
+):
     """Computes Leavitt-related indicators."""
-    ahma_period, plength, clength = 9, 9, 3
-    df["AHMA"] = lu.adaptive_hull_moving_average(df["Close"], ahma_period)
-    df["Leavitt_Projection"] = lu.leavitt_projection(df["AHMA"], plength)
+    df["AHMA"] = lu.adaptive_hull_moving_average(df["Close"], ahma_window)
+    df["Leavitt_Projection"] = lu.leavitt_projection(df["AHMA"], leavitt_proj_window)
     df["Leavitt_Convolution"], df["LC_Slope"], df["LC_Intercept"] = (
-        lu.leavitt_convolution(df["AHMA"], plength, clength)
+        lu.leavitt_convolution(df["AHMA"], leavitt_proj_window, leavitt_conv_window)
     )
     df["LC_Acceleration"] = lu.leavitt_acceleration(df["LC_Slope"])
     df["Convolution_Probability"] = lu.convolution_probability(
