@@ -1,0 +1,48 @@
+# ───────────────────────────────────────────────────────────
+# GENERAL CONFIGURATION
+# ───────────────────────────────────────────────────────────
+
+# Logging level (DEBUG, INFO, WARNING, ERROR)
+LOG_LEVEL=INFO
+
+# Whether logs should be in JSON format (true/false)
+LOG_JSON=false
+
+# Path to the input dataset file
+INPUT_DATA_FILE_PATH="notebook/data/EUR_USD_D.csv"
+
+# The target column for machine learning/trading models
+TARGET_COLUMN="Movement_Class"
+
+
+# ───────────────────────────────────────────────────────────
+# LEAVITT CONVOLUTION CONFIGURATION
+# ───────────────────────────────────────────────────────────
+
+# Adaptive Hull Moving Average (AHMA) window size
+AHMA_WINDOW=25
+
+# Leavitt Projection window size
+LEAVITT_PROJ_WINDOW=9
+
+# Leavitt Convolution window size
+LEAVITT_CONV_WINDOW=3
+
+
+# ───────────────────────────────────────────────────────────
+# ATR CONFIGURATION
+# ───────────────────────────────────────────────────────────
+
+# Average True Range (ATR) calculation window
+ATR_WINDOW=14
+
+
+# ───────────────────────────────────────────────────────────
+# MOVEMENT CLASSIFICATION CONFIGURATION
+# ───────────────────────────────────────────────────────────
+
+# Rolling period for movement classification (linked to ATR)
+MOVEMENT_PERIOD=14
+
+# Multiplier for ATR-based dynamic movement threshold
+MOVEMENT_SCALE_FACTOR=0.25

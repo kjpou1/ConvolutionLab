@@ -93,6 +93,13 @@ The project integrates residual error correction models to enhance the accuracy 
    source venv/bin/activate  # On Linux/Mac  
    venv\Scripts\activate     # On Windows  
    ```  
+4. Set environment file
+
+    Copy or rename the `example_env` file to `.env` before running
+
+    ```bash
+    cp example_env .env
+    ```
 
 ---
 
