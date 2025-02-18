@@ -6,6 +6,7 @@ import sys
 import joblib  # For loading the trained model
 import pandas as pd
 
+from src.config.config import Config
 from src.logger_manager import LoggerManager
 from src.pipeline.predict_pipeline import PredictPipeline  # Ensure src is accessible
 
@@ -165,7 +166,17 @@ if __name__ == "__main__":
         default="predictions.csv",
         help="Path to save predictions CSV file (default: predictions.csv).",
     )
+    parser.add_argument(
+        "--model-file",
+        type=str,
+        required=False,
+        help="Path to the trained model file.",
+    )
+
     args = parser.parse_args()
+    model_file = getattr(args, "model_file", None)
+    if model_file:
+        Config().model_file = model_file
 
     try:
         df_ohlcv = load_data(args.input)
