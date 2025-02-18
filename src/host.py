@@ -89,5 +89,7 @@ class Host:
         """
         Execute the model training workflow.
         """
+        if self.args.model_file:
+            self.config.model_file = self.args.model_file
         train_pipeline = TrainPipeline()
         train_pipeline.run_pipeline()

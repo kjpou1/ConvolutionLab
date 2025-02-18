@@ -241,6 +241,19 @@ class Config(metaclass=SingletonMeta):
             raise ValueError("Movement scale factor must be a positive float.")
         self._movement_scale_factor = value
 
+    @property
+    def model_file(self):
+        """Get the model filename."""
+        return self._model_file
+
+    @model_file.setter
+    def model_file(self, value):
+        """Set the model filename."""
+        if not isinstance(value, str):
+            raise ValueError("model_file must be a string.")
+        self._model_file = value
+        self.MODEL_FILE_PATH = os.path.join(self.MODEL_DIR, self._model_file)
+
     @classmethod
     def initialize(cls):
         """

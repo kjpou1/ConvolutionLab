@@ -10,3 +10,4 @@ class CommandLineArgs:
     model_type: Optional[List[str]] = None  # List of models to train (optional).
     best_of_all: bool = False
     save_best: bool = False
+    model_file: str = "model.pkl"

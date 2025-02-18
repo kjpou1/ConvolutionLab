@@ -70,6 +70,14 @@ class CommandLine:
             help="If set, saves the best-performing model after training.",
         )
 
+        train_parser.add_argument(
+            "--model-file",
+            type=str,
+            required=False,
+            default="model.pkl",
+            help="Specify the filename to save the trained model.",
+        )
+
         # Parse the arguments
         args = parser.parse_args()
 
@@ -113,4 +121,5 @@ class CommandLine:
             model_type=args.model_type if hasattr(args, "model_type") else None,
             best_of_all=args.best_of_all if hasattr(args, "best_of_all") else False,
             save_best=args.save_best if hasattr(args, "save_best") else False,
+            model_file=getattr(args, "model_file", "model.pkl"),
         )
