@@ -26,13 +26,13 @@ class Config(metaclass=SingletonMeta):
         self._model_type = None  # Default value for model_type
         self._best_of_all = False  # Default value for best_of_all
         self._save_best = False  # Default value for save_best
-        self._input_data_file_path = os.getenv("INPUT_DATA_FILE_PATH", "data/data.csv")
+        self._input_data_path = os.getenv("INPUT_DATA_PATH", "data/data.csv")
         self._target_column = os.getenv(
             "TARGET_COLUMN", "Target_T+1"
         )  # Default target column
 
         self._model_config_path = os.getenv(
-            "MODEL_CONFIG_FILE_PATH", "config/model_config.yml"
+            "MODEL_CONFIG_PATH", "config/model_config.yml"
         )
 
         # Load Leavitt-related parameters
@@ -159,16 +159,16 @@ class Config(metaclass=SingletonMeta):
         self._save_best = value
 
     @property
-    def input_data_file_path(self):
+    def input_data_path(self):
         """Get the input data file path."""
-        return self._input_data_file_path
+        return self._input_data_path
 
-    @input_data_file_path.setter
-    def input_data_file_path(self, value):
+    @input_data_path.setter
+    def input_data_path(self, value):
         """Set the input data file path."""
         if not isinstance(value, str):
-            raise ValueError("input_data_file_path must be a string.")
-        self._input_data_file_path = value
+            raise ValueError("input_data_path must be a string.")
+        self._input_data_path = value
 
     # Getter and Setter for AHMA_WINDOW
     @property

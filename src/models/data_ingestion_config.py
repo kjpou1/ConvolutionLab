@@ -14,7 +14,6 @@ class DataIngestionConfig:
     config: Config = Config()  # Access the centralized Config singleton
 
     # File paths
-    input_data_path: str = config.input_data_file_path
     train_data_path: str = os.path.join(
         config.PROCESSED_DATA_DIR, "train.csv"
     )  # Training data

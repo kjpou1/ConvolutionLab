@@ -12,3 +12,4 @@ class CommandLineArgs:
     save_best: bool = False
     model_file: str = "model.pkl"
     model_config_path: str = None
+    input_data_path: str = None

@@ -54,7 +54,7 @@ class ModelTrainingService:
             )
 
             # Load model configuration
-            model_configs = load_model_config()
+            model_configs = load_model_config(self.config.model_config_path)
             # Extract the requested model's configuration
             model_info = self._get_model_info(model_name, model_configs)
 

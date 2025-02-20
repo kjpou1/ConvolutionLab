@@ -55,7 +55,7 @@ class TrainPipeline:
 
             # Step 3: Model Training and Selection
             logging.info("Starting model training and selection.")
-            model_configs = load_model_config()
+            model_configs = load_model_config(self.config.model_config_path)
 
             models_to_train = []
             if self.config.best_of_all:

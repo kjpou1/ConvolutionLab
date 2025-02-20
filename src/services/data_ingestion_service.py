@@ -229,15 +229,13 @@ class DataIngestionService:
         """
         logging.info("Entered the data ingestion method.")
         try:
-            if not os.path.exists(self.ingestion_config.input_data_path):
-                logging.error(
-                    f"Input file not found at {self.ingestion_config.input_data_path}"
-                )
+            if not os.path.exists(self.config.input_data_path):
+                logging.error(f"Input file not found at {self.config.input_data_path}")
                 raise FileNotFoundError(
-                    f"File not found: {self.ingestion_config.input_data_path}"
+                    f"File not found: {self.config.input_data_path}"
                 )
 
-            df = pd.read_csv(self.ingestion_config.input_data_path)
+            df = pd.read_csv(self.config.input_data_path)
             logging.info("Read the dataset as a pandas DataFrame.")
 
             # Apply preprocessing (renaming, dropping unnecessary columns)

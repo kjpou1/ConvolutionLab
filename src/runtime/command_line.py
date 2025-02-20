@@ -34,6 +34,12 @@ class CommandLine:
             action="store_true",
             help="Enable debug mode during ingestion.",
         )
+        ingest_parser.add_argument(
+            "--input-data-path",
+            type=str,
+            required=False,
+            help="Path to the input data file.",
+        )
 
         # Subcommand: train
         train_parser = subparsers.add_parser(
@@ -77,6 +83,13 @@ class CommandLine:
             required=False,
             default="model.pkl",
             help="Specify the filename to save the trained model.",
+        )
+
+        train_parser.add_argument(
+            "--input-data-path",
+            type=str,
+            required=False,
+            help="Path to the input data file.",
         )
 
         # Parse the arguments
@@ -124,4 +137,5 @@ class CommandLine:
             save_best=getattr(args, "save_best", False),
             model_file=getattr(args, "model_file", "model.pkl"),
             model_config_path=getattr(args, "model_config_path", None),
+            input_data_path=getattr(args, "input_data_path", "data/data.csv"),
         )
