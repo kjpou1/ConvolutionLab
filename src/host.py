@@ -91,5 +91,7 @@ class Host:
         """
         if self.args.model_file:
             self.config.model_file = self.args.model_file
+        if self.args.model_config_path:
+            self.config.model_config_path = self.args.model_config_path
         train_pipeline = TrainPipeline()
         train_pipeline.run_pipeline()

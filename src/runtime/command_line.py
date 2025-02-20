@@ -40,12 +40,13 @@ class CommandLine:
             "train", help="Train the model using the configured pipeline."
         )
         train_parser.add_argument(
-            "--config",
+            "--model-config-path",
             type=str,
             required=False,
             default="config/model_config.yaml",
-            help="Path to the configuration file for training.",
+            help="Path to the model configuration file.",
         )
+
         train_parser.add_argument(
             "--debug",
             action="store_true",
@@ -91,7 +92,7 @@ class CommandLine:
             if not args.model_type and not args.best_of_all:
                 parser.error("You must specify either --model-type or --best-of-all.")
                 sys.exit(1)
-            supported_model_types = load_supported_model_types(args.config)
+            supported_model_types = load_supported_model_types(args.model_config_path)
 
             # Validate model types
             if args.model_type:
@@ -116,10 +117,11 @@ class CommandLine:
         # Return a CommandLineArgs object with parsed values
         return CommandLineArgs(
             command=args.command,
-            config=args.config,
+            config=getattr(args, "config", None),
             debug=args.debug,
-            model_type=args.model_type if hasattr(args, "model_type") else None,
-            best_of_all=args.best_of_all if hasattr(args, "best_of_all") else False,
-            save_best=args.save_best if hasattr(args, "save_best") else False,
+            model_type=getattr(args, "model_type", None),
+            best_of_all=getattr(args, "best_of_all", False),
+            save_best=getattr(args, "save_best", False),
             model_file=getattr(args, "model_file", "model.pkl"),
+            model_config_path=getattr(args, "model_config_path", None),
         )

@@ -31,6 +31,10 @@ class Config(metaclass=SingletonMeta):
             "TARGET_COLUMN", "Target_T+1"
         )  # Default target column
 
+        self._model_config_path = os.getenv(
+            "MODEL_CONFIG_FILE_PATH", "config/model_config.yml"
+        )
+
         # Load Leavitt-related parameters
         self._ahma_window = int(os.getenv("AHMA_WINDOW", 20))
         self._leavitt_proj_window = int(os.getenv("LEAVITT_PROJ_WINDOW", 9))
@@ -253,6 +257,18 @@ class Config(metaclass=SingletonMeta):
             raise ValueError("model_file must be a string.")
         self._model_file = value
         self.MODEL_FILE_PATH = os.path.join(self.MODEL_DIR, self._model_file)
+
+    @property
+    def model_config_path(self):
+        """Get the model configuration file path."""
+        return self._model_config_path
+
+    @model_config_path.setter
+    def model_config_path(self, value):
+        """Set the model configuration file path."""
+        if not isinstance(value, str):
+            raise ValueError("model_config_file_path must be a string.")
+        self._model_config_path = value
 
     @classmethod
     def initialize(cls):

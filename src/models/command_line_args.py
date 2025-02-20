@@ -11,3 +11,4 @@ class CommandLineArgs:
     best_of_all: bool = False
     save_best: bool = False
     model_file: str = "model.pkl"
+    model_config_path: str = None
