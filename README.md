@@ -21,6 +21,7 @@
     - [Example Runs](#example-runs)
     - [Notes](#notes)
   - [Configuration](#configuration)
+  - [Data Ingestion Formats](#data-ingestion-formats)
   - [Project Structure](#project-structure)
   - [Technologies Used](#technologies-used)
   - [Automated Test Suite Documentation](#automated-test-suite-documentation)
@@ -181,6 +182,26 @@ python launch.py train --config config/model_config.yaml --debug
 
 ---
 
+## Data Ingestion Formats  
+The data ingestion process supports two formats:
+
+1. **OANDA API format**:
+   ```csv
+   time,volume,mid_o,mid_h,mid_l,mid_c,bid_o,bid_h,bid_l,bid_c,ask_o,ask_h,ask_l,ask_c
+   2018-01-01 22:00:00-05:00,35630,1.20039,1.20812,1.20019,1.2058,1.20009,1.20806,1.19975,1.2055,1.20069,1.20819,1.20051,1.2061
+   ```
+
+2. **DOHLCV format**:
+   ```csv
+   Date,Volume,Open,High,Low,Close
+   2018-01-01 22:00:00+00:00,95988,1.10107,1.10309,1.098,1.10226
+   ```
+
+During the ingestion process, **OANDA files will be transformed into DOHLCV format** for further processing.
+
+---
+
+
 ## Project Structure  
 ```plaintext  
 ml_project_template/  
@@ -244,4 +265,6 @@ For a comprehensive guide on the available sample applications, including their 
 ## Acknowledgements  
 - Scikit-learn documentation for algorithm support.  
 - Community contributors for feedback and improvements.  
+
+
 
