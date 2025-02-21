@@ -11,4 +11,4 @@ class DataTransformationConfig:
     Defines the file path for saving the preprocessor object.
     """
 
-    preprocessor_obj_file_path: str = Config().PREPROCESSOR_FILE_PATH
+    pass

@@ -7,6 +7,7 @@ from sklearn.metrics import accuracy_score
 from src.config.config import Config
 from src.exception import CustomException
 from src.logger_manager import LoggerManager
+from src.models.model_container import ModelContainer
 from src.services.data_ingestion_service import DataIngestionService
 from src.services.data_transformation_service import DataTransformationService
 from src.services.model_training_service import ModelTrainingService
@@ -40,14 +41,12 @@ class TrainPipeline:
 
             # Step 2: Data Transformation
             logging.info("Starting data transformation.")
-            train_arr, validation_arr, preprocessor_path = (
+            train_arr, validation_arr, preprocessor_obj = (
                 self.data_transformation_service.initiate_data_transformation(
                     train_path, validation_path, target_column=self.config.target_column
                 )
             )
-            logging.info(
-                f"Data transformed and preprocessor saved at: {preprocessor_path}"
-            )
+            logging.info(f"Data transformed.")
 
             # Initialize an empty model_report to capture accuracy scores for all models
             model_report = {}
@@ -116,7 +115,8 @@ class TrainPipeline:
             # logging.info(f"Training history updated: {history_entry}")
 
             if self.config.save_best:
-                save_object(self.config.MODEL_FILE_PATH, best_model)
+                best_model = ModelContainer(best_model, preprocessor_obj)
+                best_model.save(self.config.MODEL_FILE_PATH)
 
             return model_report
 

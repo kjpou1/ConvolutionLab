@@ -181,10 +181,6 @@ class DataTransformationService:
 
             logging.info("Preprocessing completed and object saved.")
 
-            save_object(
-                file_path=self.data_transformation_config.preprocessor_obj_file_path,
-                obj=preprocessing_obj,
-            )
             logging.info(
                 "Shape of transformed train array: %s", input_feature_train_arr.shape
             )
@@ -194,7 +190,7 @@ class DataTransformationService:
             return (
                 train_arr,
                 test_arr,
-                self.data_transformation_config.preprocessor_obj_file_path,
+                preprocessing_obj,
             )
         except Exception as e:
             raise CustomException(e, sys) from e

@@ -7,6 +7,7 @@ import pandas as pd
 from src.config.config import Config
 from src.exception import CustomException
 from src.logger_manager import LoggerManager
+from src.models.model_container import ModelContainer
 from src.services.data_ingestion_service import DataIngestionService
 from src.utils.file_utils import load_object
 
@@ -21,16 +22,16 @@ class PredictPipeline:
         try:
             self.config = Config()
             model_path = self.config.MODEL_FILE_PATH
-            preprocessor_path = self.config.PREPROCESSOR_FILE_PATH
             self.ingestion_service = DataIngestionService()
 
             logging.info("Loading model and preprocessor.")
 
             # Load the model and preprocessor once during initialization
-            self.model = load_object(file_path=model_path)
-            self.preprocessor = load_object(file_path=preprocessor_path)
+            model_container = ModelContainer.load(model_path)
+            self.model = model_container.model
+            self.transformer = model_container.transformer
 
-            logging.info("Model and preprocessor loaded successfully.")
+            logging.info("Model and transformer loaded successfully.")
         except Exception as e:
             raise CustomException(e, sys) from e
 
@@ -52,7 +53,7 @@ class PredictPipeline:
             preprocessed_features = self.ingestion_service.preprocess_data(features)
 
             # Preprocess the features
-            data_scaled = self.preprocessor.transform(preprocessed_features)
+            data_scaled = self.transformer.transform(preprocessed_features)
             logging.info("Data transformed successfully.")
 
             # Make predictions

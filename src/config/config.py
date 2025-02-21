@@ -57,7 +57,6 @@ class Config(metaclass=SingletonMeta):
         self.CONFIDENCE_RANGE_FILE_PATH = os.path.join(
             self.MODEL_DIR, "confidence_range.pkl"
         )
-        self.PREPROCESSOR_FILE_PATH = os.path.join(self.BASE_DIR, "preprocessor.pkl")
         self.LOG_DIR = os.path.join(self.BASE_DIR, "logs")
         self.HISTORY_DIR = os.path.join(self.BASE_DIR, "history")
         self.HISTORY_FILE_PATH = os.path.join(
