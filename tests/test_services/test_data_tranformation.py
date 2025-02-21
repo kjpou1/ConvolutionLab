@@ -1,9 +1,11 @@
 import os
-import pytest
-import pandas as pd
+
 import numpy as np
-from src.services.data_transformation_service import DataTransformationService
+import pandas as pd
+import pytest
+
 from src.exception import CustomException
+from src.services.data_transformation_service import DataTransformationService
 from src.utils.file_utils import load_object
 
 
@@ -48,9 +50,9 @@ def test_data_transformation(sample_data, tmp_path):
     transformation_service = DataTransformationService()
 
     # Set the output path for the preprocessor
-    transformation_service.data_transformation_config.preprocessor_obj_file_path = str(
-        tmp_path / "preprocessor.pkl"
-    )
+    # transformation_service.data_transformation_config.preprocessor_obj_file_path = str(
+    #     tmp_path / "preprocessor.pkl"
+    # )
 
     # Perform data transformation
     train_arr, test_arr, preprocessor_path = (
