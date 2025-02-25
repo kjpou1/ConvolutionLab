@@ -183,3 +183,6 @@ strategy
 # Ignore artifacts directory
 **/artifacts/*
 README for later.md
+
+# personal configs
+config/model_config_*
