@@ -21,6 +21,8 @@ models:
 
   Logistic Regression:
     type: LogisticRegression
+    constructor_params:  
+      class_weight: balanced
     params:
       solver: ["lbfgs", "liblinear"]
       max_iter: [100, 500, 1000]
@@ -43,6 +45,9 @@ models:
       loss_function: MultiClass
       logging_level : Info      #Verbose
       train_dir: artifacts/logs/catboost_training
+      auto_class_weights: "Balanced"
+      boosting_type: Ordered
+      random_seed: 42      
     params:
       depth: [6, 8]  # ✅ Reduce depth to avoid overfitting
       learning_rate: [0.01, 0.05]  # ✅ Slightly lower learning rate
