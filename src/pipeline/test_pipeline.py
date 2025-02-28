@@ -113,10 +113,8 @@ class TestPipeline:
             #     * 100
             # )
 
-            ## Directional Accuracy
-            directional_accuracy = np.mean(
-                np.sign(y_pred[1:] - y_pred[:-1]) == np.sign(y_test[1:] - y_test[:-1])
-            )
+            ## Trade Signal Accuracy (Replacing Directional Accuracy)
+            trade_signal_accuracy = self.compute_trade_signal_accuracy(y_test, y_pred)
 
             ## Error Distribution Statistics
             errors = y_test - y_pred
@@ -146,7 +144,7 @@ class TestPipeline:
                     # "Test Set SMAPE": smape,
                     "Test Set F1 Macro": f1_macro,
                     "Test Set F1 Weighted": f1_weighted,
-                    "Test Set Directional Accuracy": directional_accuracy,
+                    "Test Set Trade Signal Accuracy": trade_signal_accuracy,
                     "Test Set Confusion Matrix": conf_matrix,
                     "Test Set Classification Report": class_report,
                     "Test Set Error Distribution": error_distribution,
@@ -162,3 +160,30 @@ class TestPipeline:
         except Exception as e:
             logging.error(f"Error in test pipeline: {e}")
             raise CustomException(e, sys) from e
+
+    def compute_trade_signal_accuracy(self, y_true, y_pred):
+        """
+        Computes trade signal accuracy based on model predictions (Buy/Sell/Neutral)
+        and actual market movements.
+
+        :param y_true: Actual Movement_Class labels.
+        :param y_pred: Predicted Movement_Class labels.
+        :return: Trade signal accuracy as a float.
+        """
+        correct_trades = 0
+        total_trades = 0
+
+        for i in range(len(y_true)):
+            # A Buy signal should match a Strong Up Move (Class 2)
+            if y_pred[i] == 2 and y_true[i] == 2:
+                correct_trades += 1
+            # A Sell signal should match a Strong Down Move (Class 0)
+            elif y_pred[i] == 0 and y_true[i] == 0:
+                correct_trades += 1
+            # A Neutral signal should match a Neutral move (Class 1)
+            elif y_pred[i] == 1 and y_true[i] == 1:
+                correct_trades += 1
+
+            total_trades += 1
+
+        return correct_trades / total_trades if total_trades > 0 else 0.0
