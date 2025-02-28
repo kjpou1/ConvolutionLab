@@ -1,4 +1,4 @@
-# **🚀 Trade Test Workflow Documentation**  
+# **🚀 Train Test Workflow Documentation**  
 🎩 **Mastering the Art of Model Evaluation with ChatGPT-Fu** 🥋  
 
 This document outlines the **sacred ritual** of training, testing, and evaluating trading models.  
