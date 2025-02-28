@@ -140,23 +140,23 @@ class DataTransformationService:
             raise CustomException(e, sys) from e
 
     def initiate_data_transformation(
-        self, train_path: str, test_path: str, target_column: str
+        self, train_path: str, validation_path: str, target_column: str
     ):
         """
         Reads train and test datasets, applies preprocessing, and saves the preprocessor object.
 
         Args:
             train_path (str): Path to the training dataset.
-            test_path (str): Path to the testing dataset.
+            validation_path (str): Path to the validation dataset.
 
         Returns:
-            tuple: Transformed training array, testing array, and the path to the saved preprocessor object.
+            tuple: Transformed training array, validation array, and the path to the saved preprocessor object.
         """
         try:
             train_df = pd.read_csv(train_path)
-            test_df = pd.read_csv(test_path)
+            validation_df = pd.read_csv(validation_path)
 
-            logging.info("Read train and test data completed.")
+            logging.info("Read train and validation data completed.")
             logging.info("Obtaining preprocessing object.")
 
             preprocessing_obj = self.get_data_transformer_object()
@@ -164,20 +164,28 @@ class DataTransformationService:
             input_feature_train_df = train_df.drop(columns=[target_column], axis=1)
             target_feature_train_df = train_df[target_column]
 
-            input_feature_test_df = test_df.drop(columns=[target_column], axis=1)
-            target_feature_test_df = test_df[target_column]
+            input_feature_validation_df = validation_df.drop(
+                columns=[target_column], axis=1
+            )
+            target_feature_validation_df = validation_df[target_column]
 
-            logging.info("Applying preprocessing object on training and testing data.")
+            logging.info(
+                "Applying preprocessing object on training and validation data."
+            )
 
             input_feature_train_arr = preprocessing_obj.fit_transform(
                 input_feature_train_df
             )
-            input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
+            input_feature_validation_arr = preprocessing_obj.transform(
+                input_feature_validation_df
+            )
 
             train_arr = np.c_[
                 input_feature_train_arr, np.array(target_feature_train_df)
             ]
-            test_arr = np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
+            validation_arr = np.c_[
+                input_feature_validation_arr, np.array(target_feature_validation_df)
+            ]
 
             logging.info("Preprocessing completed and object saved.")
 
@@ -185,12 +193,44 @@ class DataTransformationService:
                 "Shape of transformed train array: %s", input_feature_train_arr.shape
             )
             logging.info(
-                "Shape of transformed test array: %s", input_feature_test_arr.shape
+                "Shape of transformed test array: %s",
+                input_feature_validation_arr.shape,
             )
             return (
                 train_arr,
-                test_arr,
+                validation_arr,
                 preprocessing_obj,
             )
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    def initiate_data_transformation_for_test(
+        self, test_path: str, target_column: str, preprocessing_obj
+    ):
+        """
+        Reads the test dataset, applies the saved preprocessing transformations.
+
+        Args:
+            test_path (str): Path to the test dataset.
+            target_column (str): Target column name.
+
+        Returns:
+            tuple: Transformed test array and preprocessor object.
+        """
+        try:
+            logging.info("📥 Loading test dataset.")
+            test_df = pd.read_csv(test_path)
+
+            logging.info("🔄 Applying preprocessing to test data.")
+            input_feature_test_df = test_df.drop(columns=[target_column], axis=1)
+            target_feature_test_df = test_df[target_column]
+
+            input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
+
+            test_arr = np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
+            logging.info("✅ Test data transformation complete.")
+
+            return test_arr
+
         except Exception as e:
             raise CustomException(e, sys) from e

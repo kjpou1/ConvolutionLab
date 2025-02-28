@@ -4,6 +4,7 @@ from src.config.config import Config
 from src.exception import CustomException
 from src.logger_manager import LoggerManager
 from src.models.command_line_args import CommandLineArgs
+from src.pipeline.test_pipeline import TestPipeline
 from src.pipeline.train_pipeline import TrainPipeline
 from src.services.data_ingestion_service import DataIngestionService
 
@@ -61,6 +62,9 @@ class Host:
                 #         "A model type must be specified for the 'train' command."
                 #     )
                 await self.run_training()
+            elif self.args.command == "test":
+                logging.info("Executing testing workflow.")
+                await self.run_testing()
             else:
                 logging.error("No valid subcommand provided.")
                 raise ValueError(
@@ -101,3 +105,15 @@ class Host:
 
         train_pipeline = TrainPipeline()
         train_pipeline.run_pipeline()
+
+    async def run_testing(self):
+        """
+        Execute the model testing workflow.
+        """
+        if self.args.model_file:
+            self.config.model_file = self.args.model_file
+        if self.args.input_data_path:
+            self.config.input_data_path = self.args.input_data_path
+
+        test_pipeline = TestPipeline()
+        test_pipeline.run_pipeline()

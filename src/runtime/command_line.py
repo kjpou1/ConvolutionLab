@@ -92,6 +92,32 @@ class CommandLine:
             help="Path to the input data file.",
         )
 
+        # Subcommand: test
+        test_parser = subparsers.add_parser(
+            "test", help="Test the model using the configured pipeline."
+        )
+
+        test_parser.add_argument(
+            "--debug",
+            action="store_true",
+            help="Enable debug mode during testing.",
+        )
+
+        test_parser.add_argument(
+            "--model-file",
+            type=str,
+            required=False,
+            default="model.pkl",
+            help="Specify the filename to save the trained model.",
+        )
+
+        test_parser.add_argument(
+            "--input-data-path",
+            type=str,
+            required=False,
+            help="Path to the input data file.",
+        )
+
         # Parse the arguments
         args = parser.parse_args()
 

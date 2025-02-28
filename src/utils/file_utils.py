@@ -80,6 +80,24 @@ def save_json(file_path: str, obj: object) -> None:
         ) from e
 
 
+def save_json_safe(data, filepath):
+    """Save JSON ensuring NumPy types are converted to native Python types."""
+
+    def convert(obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()  # Convert arrays to lists
+        if isinstance(obj, (np.int64, np.int32)):
+            return int(obj)  # Convert NumPy integers
+        if isinstance(obj, (np.float64, np.float32)):
+            return float(obj)  # Convert NumPy floats
+        return obj  # Default return
+
+    data_serializable = json.loads(json.dumps(data, default=convert))
+
+    with open(filepath, "w") as f:
+        json.dump(data_serializable, f, indent=4)
+
+
 def save_training_artifacts(history, model_type, run_id):
     """
     Save training artifacts, including the training history and metadata,

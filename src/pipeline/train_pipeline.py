@@ -117,6 +117,8 @@ class TrainPipeline:
             if self.config.save_best:
                 best_model = ModelContainer(best_model, preprocessor_obj)
                 best_model.save(self.config.MODEL_FILE_PATH)
+                logging.info(f"Training Features Shape: {train_arr.shape}")
+                logging.info(f"Validation Features Shape: {validation_arr.shape}")
 
             return model_report
 
