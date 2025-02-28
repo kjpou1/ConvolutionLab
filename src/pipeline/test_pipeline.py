@@ -55,8 +55,8 @@ class TestPipeline:
             # preprocessed_features = self.ingestion_service.preprocess_data(features)
             # Step 1: Data Ingestion
             logging.info("Loading test dataset.")
-            train_path, validation_path, test_path, _ = (
-                self.data_ingestion_service.initiate_data_ingestion("Movement_Class")
+            _, _, test_path, _ = self.data_ingestion_service.initiate_data_ingestion(
+                "Movement_Class"
             )  # Test set is included here
             logging.info(f"Test data path: {test_path}")
 
@@ -90,28 +90,28 @@ class TestPipeline:
             rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 
             # Prevent division by zero in MAPE
-            nonzero_mask = y_test != 0
-            mape = (
-                np.mean(
-                    np.abs(
-                        (y_test[nonzero_mask] - y_pred[nonzero_mask])
-                        / y_test[nonzero_mask]
-                    )
-                )
-                * 100
-            )
+            # nonzero_mask = y_test != 0
+            # mape = (
+            #     np.mean(
+            #         np.abs(
+            #             (y_test[nonzero_mask] - y_pred[nonzero_mask])
+            #             / y_test[nonzero_mask]
+            #         )
+            #     )
+            #     * 100
+            # )
 
-            # Prevent division by zero in SMAPE
-            denominator = np.abs(y_test) + np.abs(y_pred)
-            denominator_mask = denominator != 0  # Avoid divide-by-zero
-            smape = (
-                np.mean(
-                    2
-                    * np.abs(y_test[denominator_mask] - y_pred[denominator_mask])
-                    / denominator[denominator_mask]
-                )
-                * 100
-            )
+            # # Prevent division by zero in SMAPE
+            # denominator = np.abs(y_test) + np.abs(y_pred)
+            # denominator_mask = denominator != 0  # Avoid divide-by-zero
+            # smape = (
+            #     np.mean(
+            #         2
+            #         * np.abs(y_test[denominator_mask] - y_pred[denominator_mask])
+            #         / denominator[denominator_mask]
+            #     )
+            #     * 100
+            # )
 
             ## Directional Accuracy
             directional_accuracy = np.mean(
@@ -124,8 +124,16 @@ class TestPipeline:
                 "Mean Error": np.mean(errors),
                 "Median Error": np.median(errors),
                 "Standard Deviation": np.std(errors),
-                "Skewness": stats.skew(errors),
-                "Kurtosis": stats.kurtosis(errors),
+                "Skewness": float(
+                    stats.skew(errors)[0]
+                    if isinstance(stats.skew(errors), np.ndarray)
+                    else stats.skew(errors)
+                ),
+                "Kurtosis": float(
+                    stats.kurtosis(errors)[0]
+                    if isinstance(stats.kurtosis(errors), np.ndarray)
+                    else stats.kurtosis(errors)
+                ),
             }
 
             # Step 6: Save Test Results
@@ -134,8 +142,8 @@ class TestPipeline:
                     "Test Set Accuracy": accuracy,
                     "Test Set MAE": mae,
                     "Test Set RMSE": rmse,
-                    "Test Set MAPE": mape,
-                    "Test Set SMAPE": smape,
+                    # "Test Set MAPE": mape,
+                    # "Test Set SMAPE": smape,
                     "Test Set F1 Macro": f1_macro,
                     "Test Set F1 Weighted": f1_weighted,
                     "Test Set Directional Accuracy": directional_accuracy,
