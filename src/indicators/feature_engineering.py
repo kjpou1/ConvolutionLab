@@ -29,12 +29,17 @@ def compute_leavitt_data(
     ahma_window: int,
     leavitt_proj_window: int,
     leavitt_conv_window: int,
+    method: str = "lsr",
 ):
     """Computes Leavitt-related indicators."""
     df["AHMA"] = lu.adaptive_hull_moving_average(df["Close"], ahma_window)
-    df["Leavitt_Projection"] = lu.leavitt_projection(df["AHMA"], leavitt_proj_window)
+    df["Leavitt_Projection"] = lu.leavitt_projection(
+        df["AHMA"], leavitt_proj_window, method
+    )
     df["Leavitt_Convolution"], df["LC_Slope"], df["LC_Intercept"] = (
-        lu.leavitt_convolution(df["AHMA"], leavitt_proj_window, leavitt_conv_window)
+        lu.leavitt_convolution(
+            df["AHMA"], leavitt_proj_window, leavitt_conv_window, method
+        )
     )
     df["LC_Acceleration"] = lu.leavitt_acceleration(df["LC_Slope"])
     df["Convolution_Probability"] = lu.convolution_probability(
