@@ -117,7 +117,7 @@ class TestPipeline:
             trade_signal_accuracy = self.compute_trade_signal_accuracy(y_test, y_pred)
 
             ## Error Distribution Statistics
-            errors = y_test - y_pred
+            errors = np.abs(y_test - y_pred)
             error_distribution = {
                 "Mean Error": np.mean(errors),
                 "Median Error": np.median(errors),
