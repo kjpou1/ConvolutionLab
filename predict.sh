@@ -6,8 +6,10 @@ ORIGINAL_DIR="$(pwd)"
 # Get the absolute path of the script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Change the working directory to the script directory
-cd "$SCRIPT_DIR" || exit
+cd "$SCRIPT_DIR" || {
+  echo "❌ Failed to switch to script directory"
+  exit 1
+}
 
 # Activate virtual environment
 source "$SCRIPT_DIR/.venv/bin/activate"
